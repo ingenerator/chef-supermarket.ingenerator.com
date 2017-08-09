@@ -10,3 +10,5 @@ cookbooks:
     github-tags: 'ingenerator/chef-ingenerator-php'
   ingenerator-source:
     github-tags: 'ingenerator/chef-ingenerator-source'
+  monitored-cron:
+    github-tags: 'ingenerator/chef-monitored-cron'
