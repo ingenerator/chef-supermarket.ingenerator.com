@@ -1,0 +1,10 @@
+# This inventory will be compiled to add all known tags for cookbooks specified as github repos
+sources:
+  - 'https://supermarket.chef.io'
+cookbooks:
+  ingenerator-base:
+    github-tags: 'ingenerator/chef-ingenerator-base'
+  ingenerator-mysql:
+    github-tags: 'ingenerator/chef-ingenerator-mysql'
+  ingenerator-php:
+    github-tags: 'ingenerator/chef-ingenerator-php'
