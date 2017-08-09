@@ -3,3 +3,6 @@
 /inventory.yml
 .bundle
 /vendor
+# Dynamic directories produced by minimart
+/inventory
+/web
