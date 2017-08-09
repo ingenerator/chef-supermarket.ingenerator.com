@@ -8,3 +8,5 @@ cookbooks:
     github-tags: 'ingenerator/chef-ingenerator-mysql'
   ingenerator-php:
     github-tags: 'ingenerator/chef-ingenerator-php'
+  ingenerator-source:
+    github-tags: 'ingenerator/chef-ingenerator-source'
