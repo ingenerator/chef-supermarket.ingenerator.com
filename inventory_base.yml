@@ -15,4 +15,8 @@ cookbooks:
   monitored-cron:
     github-tags: 'ingenerator/chef-monitored-cron'
   postfix-relay:
-    github-tags: 'ingenerator/chef-postfix-relay'
+    github-tags:
+      repo: 'ingenerator/chef-postfix-relay'
+      exclude_tags:
+        # Has invalid v0.2.0 version string in metadata
+        - v0.2.1
