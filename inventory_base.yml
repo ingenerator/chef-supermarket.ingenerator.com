@@ -2,6 +2,8 @@
 sources:
   - 'https://supermarket.chef.io'
 cookbooks:
+  duplicity-backup:
+    github-tags: 'ingenerator/chef-duplicity-backup'
   ingenerator-base:
     github-tags: 'ingenerator/chef-ingenerator-base'
   ingenerator-mysql:
