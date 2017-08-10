@@ -12,3 +12,5 @@ cookbooks:
     github-tags: 'ingenerator/chef-ingenerator-source'
   monitored-cron:
     github-tags: 'ingenerator/chef-monitored-cron'
+  postfix-relay:
+    github-tags: 'ingenerator/chef-postfix-relay'
