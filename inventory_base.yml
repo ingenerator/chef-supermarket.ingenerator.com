@@ -6,6 +6,8 @@ cookbooks:
     github-tags: 'ingenerator/chef-duplicity-backup'
   ingenerator-base:
     github-tags: 'ingenerator/chef-ingenerator-base'
+  ingenerator-helpers:
+    github-tags: 'ingenerator/chef-ingenerator-helpers'  
   ingenerator-mysql:
     github-tags: 'ingenerator/chef-ingenerator-mysql'
   ingenerator-php:
