@@ -1,0 +1,91 @@
+name: 'Build Supermarket'
+on:
+  push:
+
+  schedule:
+    - cron: '0 0 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  build-repository:
+    runs-on: ubuntu-18.04
+    name: Build packages repository
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache rubygems
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Cache inventory
+        uses: actions/cache@v2
+        with:
+          path: build/inventory
+          key: inventory-${{ hashFiles('inventory_base.yml') }}
+          restore-keys: |
+            inventory-
+
+      - name: Setup ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.4
+
+      - name: Install bundler
+        run: |
+          gem install bundler
+
+      - name: Install gems
+        run: |
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3 --deployment --binstubs
+
+      - name: Build supermarket
+        run:  bin/build-minimart.sh
+
+      - name: Store as build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: built-repository
+          path: |
+            build/web
+
+  publish-to-github-pages:
+    needs:   build-repository
+    if:      github.ref == 'refs/heads/master'
+    name:    Publish package repo to Github Pages
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: built-repository
+          path: build/web
+
+      - name: Calculate committer name
+        id:   committer_name
+        run: |
+          # Publish as the author of the change to the repo if this was a `push`
+          # Or as github actions if this was a dispatch or a scheduled action
+          if [ $GITHUB_EVENT_NAME == 'push' ]
+          then
+            echo "::set-output name=author::$GITHUB_ACTOR"
+          else
+            echo "::set-output name=author::github-actions[bot]"
+          fi
+
+      - name: Publish to github pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir:  ./build/web
+          cname:        chef-supermarket.ingenerator.com
+          user_name:    ${{steps.committer_name.outputs.author}}
+          user_email:   ${{steps.committer_name.outputs.author}}@users.noreply.github.com

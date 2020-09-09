@@ -4,25 +4,27 @@ set -o nounset
 set -o errexit
 # Build absolute path to this script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-DOCROOT="/var/www/chef-supermarket.ingenerator.com"
+INVENTORY_OUTPUT_DIR="$GITHUB_WORKSPACE/build/inventory"
+WEB_OUTPUT_DIR="$GITHUB_WORKSPACE/build/web"
 
 cd "$DIR/.."
-echo "Installing / updating dependencies"
-bundle install --deployment --binstubs
 
 echo "Compiling inventory file"
 bundle exec bin/build-inventory.rb
 
 echo "Building minimart inventory"
-bundle exec bin/minimart mirror
+bundle exec bin/minimart mirror \
+  --inventory_directory=$INVENTORY_OUTPUT_DIR
 
 echo "Building minimart web endpoint"
-bundle exec bin/minimart web --host=https://chef-supermarket.ingenerator.com
+bundle exec bin/minimart web \
+  --inventory_directory=$INVENTORY_OUTPUT_DIR \
+  --web_directory=$WEB_OUTPUT_DIR \
+  --host=https://chef-supermarket.ingenerator.com
 
-echo "Merging custom web files"
-rsync -av $DIR/../web_extra/ $DIR/../web/
-
-echo "Deploying web endpoint to $DOCROOT"
-rsync -av --delete $DIR/../web/ $DOCROOT/
+echo "Moving 'universe' file to force serving as JSON"
+mv $WEB_OUTPUT_DIR/universe $WEB_OUTPUT_DIR/_universe
+mkdir $WEB_OUTPUT_DIR/universe
+mv $WEB_OUTPUT_DIR/_universe $WEB_OUTPUT_DIR/universe/index.json
 
 echo "Build complete"

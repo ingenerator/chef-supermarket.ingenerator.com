@@ -1,4 +1,0 @@
-# Ensure the universe file is served with an application/json content-type
-<FilesMatch "^universe$">
-  ForceType application/json
-</FilesMatch>
