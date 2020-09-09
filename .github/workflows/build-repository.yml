@@ -58,7 +58,7 @@ jobs:
 
   publish-to-github-pages:
     needs:   build-repository
-#    if:      github.ref == 'refs/heads/master'
+    if:      github.ref == 'refs/heads/master'
     name:    Publish package repo to Github Pages
     timeout-minutes: 5
     runs-on: ubuntu-latest
