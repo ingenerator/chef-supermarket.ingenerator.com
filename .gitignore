@@ -5,4 +5,4 @@
 /vendor
 # Dynamic directories produced by minimart
 /inventory
-/web
+/build/web
