@@ -13,13 +13,14 @@ Note that:
   project level.
 * these cookbooks will be less discoverable than ones listed on supermarket : if the cookbook is stable /
   useful for a wider audience then it should probably be published there instead.
+* Github pages cannot serve `/universe` as `application/json`. We use the workaround of publishing the universe file as
+  `/universe/index.json` - this then causes `/universe` to redirect to `/universe/` which serves the JSON with the 
+  correct content type. **This is not, strictly, compliant with the chef API definition but berkshelf appears to follow
+  it happily**
   
 ## Building the repository
 
-* Ensure you have ruby / rubygems / bundler
-* Clone the repo
-* Run `bin/build-minimart.sh` to pull in the ruby dependencies, build the inventory and export the 
-  supermarket repository to /var/www/chef-supermarket.ingenerator.com
+* See the github actions workflow
   
 ## Adding new cookbooks
 
