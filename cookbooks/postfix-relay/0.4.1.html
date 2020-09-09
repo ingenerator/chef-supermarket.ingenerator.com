@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniMart</title>
+
+  <!-- fonts -->
+  <link href='//fonts.googleapis.com/css?family=Maven+Pro:400,700' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700,600' rel='stylesheet' type='text/css'>
+  <!-- css -->
+  <link rel="stylesheet" href="../../assets/stylesheets/application.min.css" />
+  <!-- js -->
+  <script src="../../assets/javascripts/application.min.js"></script>
+</head>
+<body>
+  <a href="../../index.html">
+  <header class="header-slim">
+    <div class="header-slim__container">
+      <h1 class="header-slim__title">Welcome to MiniMart</h1>
+      <h2 class="header-slim__subtitle">Always open and always open sourced.</h2>
+    </div>
+  </header>
+  </a>
+
+  <div class="outer-wrapper">
+    <form action="../../index.html#search/" method="GET" id="cookbook-search-form">
+  <div class="search">
+    <div class="search__td">
+      <input name="query" type="search">
+    </div>
+    <div class="search__td search__td--btn">
+      <button type="submit">Search</button>
+    </div>
+  </div>
+</form>
+
+<main class="detail-content">
+  <h1 class="detail-content__title">
+    postfix-relay
+    <span>
+      (4) Versions
+      <select class="cookbook-version-selector">
+        <option disabled selected>
+          <small>0.4.1</small>
+        </option>
+        
+          
+            <option value="../../cookbooks/postfix-relay/0.4.2.html">0.4.2</option>
+          
+        
+          
+        
+          
+            <option value="../../cookbooks/postfix-relay/0.4.0.html">0.4.0</option>
+          
+        
+          
+            <option value="../../cookbooks/postfix-relay/0.2.0.html">0.2.0</option>
+          
+        
+      </select>
+    </span>
+  </h1>
+
+  <p>Installs postfix as a local mail relay, optionally delivering all mail to local dump files (for dev/build servers)</p>
+  <code class="install-instructions">cookbook 'postfix-relay', '~> 0.4.1'</code>
+
+  <div class="tab-container">
+    <ul class="detail-content__tabs">
+      <li><a href="#readme-tab">Readme</a></li>
+      <li><a href="#dependencies-tab">Dependencies</a></li>
+      <li><a href="#changelog-tab">Changelog</a></li>
+    </ul>
+
+    <div id="readme-tab" class="markdown">
+      <h1>inGenerator postfix-relay cookbook</h1>
+
+<p><a href="https://travis-ci.org/ingenerator/chef-postfix-relay"><img src="https://travis-ci.org/ingenerator/chef-postfix-relay.png?branch=0.3.x" alt="Build Status"></a></p>
+
+<p><code>postfix-relay</code> installs and configures <a href="http://www.postfix.org/">postfix</a> as a local mail relay server.
+It supports four key goals:</p>
+
+<ul>
+<li>Capture local user alerting and notification mail on your server</li>
+<li>Reduce request handling latency and improve reliability of email delivery from your application</li>
+<li>Protect against flooding email accounts with alert/notification emails from dev and build servers</li>
+<li>Simplify functional testing of email-related parts of your application.</li>
+</ul>
+
+<h3>Capturing local user email</h3>
+
+<p>Many shell and system processes send notifications by email to local user accounts on your server. You
+can generally configure these to use alternate logging, but this is time consuming and you&#39;re likely to
+miss some. With this cookbook, all local user email can be forwarded to an external alerting/bot account.
+This will generally encourage you to switch off or find alternatives to email alerting for services you
+don&#39;t care that much about!</p>
+
+<h3>Reduce request handling latency and improve reliability</h3>
+
+<p>Your web application delivers mail to a local postfix instance on each machine, significantly reducing
+the overhead of mail processing. Multi-tenant servers can be updated to use alternate email routing,
+delivery and transport by reconfiguring the central relay server, rather than reconfiguring each
+application. Email can be routed to a single trusted outbound SMTP server, avoiding issues with 
+blacklisted or low-reputation cloud IP addresses.</p>
+
+<h3>Protect against flooding email with dev/build notifications</h3>
+
+<p>Applications on development and build servers often generate high volumes of error notifications, 
+application-related email (signup confirmations, password resets, etc). Often a dedicated external
+mailbox has to be set up to receive and dump this traffic, or applications individually configured
+not to send mail in the development environment. With this cookbook, the postfix relay transport
+can be configured to dump all outgoing mail to simple files - allowing the rest of your infrastructure
+and application to be provisioned as usual.</p>
+
+<h3>Simplify functional testing</h3>
+
+<p>Functional tests of code that sends email, and usecases that require a user to receive an email (think
+password reset, email confirmation, etc) can be tricky. Common techniques include fake email delivery 
+or logging mechanisms in your application, but this gets dull fast. With this cookbook, all outbound
+mail on dev/build is dumped to local files - your tests can easily inspect these both to check what 
+was sent and where required to extract links, authentication codes, etc from them. Your whole application
+runs in production conditions, with only the very final postfix relay switched for a fake.</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>Chef 12.18 or higher</li>
+<li><strong>Ruby 2.3 or higher</strong></li>
+</ul>
+
+<h2>Installation</h2>
+
+<p>We recommend adding to your <code>Berksfile</code> and using <a href="http://berkshelf.com/">Berkshelf</a>:</p>
+
+<pre><code class="ruby">source &#39;https://chef-supermarket.ingenerator.com&#39;
+cookbook &#39;postfix-relay&#39;, &#39;~&gt;0.4.0&#39;
+</code></pre>
+
+<p>Have your main project cookbook <em>depend</em> on postfix-relay by editing the <code>metadata.rb</code> for your cookbook. </p>
+
+<pre><code class="ruby"># metadata.rb
+depends &#39;postfix-relay&#39;
+</code></pre>
+
+<h2>Usage</h2>
+
+<p>For default installation and usage, set the following attributes in an attribute file, recipe or role.</p>
+
+<pre><code class="ruby">
+# The domain from which outbound email will be sent by default. In general your application should send with a full email address,
+# but system accounts will append this domain to their local user - eg cron output will come from root@mysite.com.
+# This is important because most remote SMTP servers will limit the domains they&#39;ll transfer mail for, so for example 
+# root@my-cloud-virtual-server-hostname.my-cloud-provider.com is unlikely to make it through.
+default[&#39;postfix_relay&#39;][&#39;email_domain&#39;] = mysite.com
+
+# A template that will be used to create forwarding addresses for local users. :user will be replaced with the username
+# Set the value to nil if you don&#39;t want to forward local mail
+default[&#39;postfix_relay&#39;][&#39;local_user_alias&#39;] = &#39;alerts+:user@mycompany.com&#39;
+
+# Optional hash of regular expressions that will be used to change the sender email address of outbound mail
+# For example, use this to change the sender email of the chef email reporting gem, which otherwise defaults to chef-client@{fqdn}
+# Set nil to remove from the map
+default[&#39;postfix_relay&#39;][&#39;outbound_address_replacements&#39;][&#39;/^chef-client@([^.]+).*$/&#39;] = &#39;chef.${1}@mysite.com&#39;
+
+# Control whether email should be relayed - you&#39;d generally set this in a role. 
+# We like to default false, whitelisting roles that should be allowed to send mail
+default[&#39;postfix_relay&#39;][&#39;allow_live_email&#39;] = true
+
+# Configure the outbound relay - you&#39;d usually set these values from an encrypted databag
+# We default to assuming your remote SMTP user is using TLS encryption and requires login and authentication
+# If you need something different you can override the underlying postfix attributes
+default[&#39;postfix_relay&#39;][&#39;live_email&#39;][&#39;relayhost&#39;]           = &#39;smtp.somewhere.com:587&#39;
+default[&#39;postfix_relay&#39;][&#39;live_email&#39;][&#39;smtp_sasl_user_name&#39;] = &#39;me@somewhere.com&#39;
+default[&#39;postfix_relay&#39;][&#39;live_email&#39;][&#39;smtp_sasl_passwd&#39;]    = &#39;password&#39;
+
+</code></pre>
+
+<p>Then add the default recipe to your <code>run_list</code>:
+```ruby</p>
+
+<h1>In a role</h1>
+
+<p>&quot;run_list&quot; : [
+  &quot;recipe[postfix-relay::default]&quot;
+]</p>
+
+<h1>In a recipe - note your cookbook must declare a dependency in metadata.rb as above</h1>
+
+<p>include_recipe &quot;postfix-relay::default&quot;
+```</p>
+
+<p>The default recipe executes the following steps:</p>
+
+<table><thead>
+<tr>
+<th>Recipe</th>
+<th>Action</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>install_postfix</td>
+<td>Runs the postfix::default recipe to install postfix, and configures the relay transports</td>
+</tr>
+<tr>
+<td>alias_local_users</td>
+<td>Creates forwarding address aliases for all local users</td>
+</tr>
+<tr>
+<td>alias_senders</td>
+<td>Creates rules to inspect outbound email and replace sender addresses using regular expressions</td>
+</tr>
+</tbody></table>
+
+<p>To customise behaviour, include any or all of these recipes directly rather than relying on the default.</p>
+
+<h2>Attributes</h2>
+
+<p>You <em>must</em> set the attributes shown in Usage above before this recipe will work. If any required attributes are not set, 
+the cookbook will raise an ArgumentError.</p>
+
+<p>Many other options are configurable - see the cookbook attributes files for details.</p>
+
+<h3>Testing</h3>
+
+<p>See the <a href=".travis.yml">.travis.yml</a> file for the current test scripts.</p>
+
+<h2>Contributing</h2>
+
+<ol>
+<li>Fork the project</li>
+<li>Create a feature branch corresponding to your change</li>
+<li>Create specs for your change</li>
+<li>Create your changes</li>
+<li>Create a Pull Request on github</li>
+</ol>
+
+<h2>License &amp; Authors</h2>
+
+<ul>
+<li>Author:: Andrew Coulton (<a href="mailto:andrew@ingenerator.com">andrew@ingenerator.com</a>)</li>
+</ul>
+
+<pre><code class="text">Copyright 2012-2014, inGenerator Ltd
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+
+    </div>
+
+    <div id="dependencies-tab">
+      
+        <ul class="dependency-list">
+          
+            
+            
+              <li>postfix ~> 5.3</li>
+            
+          
+        </ul>
+      
+    </div>
+
+    <div id="changelog-tab" class="markdown">
+      <h3>Unreleased</h3>
+
+<h2>0.4.1 (2018-08-29)</h2>
+
+<ul>
+<li>Require postfix &gt; 5.3 and implement fix for the breaking change to their sasl_auth config attributes
+in that version : throws exception if still defined and non-empty in your project (see 
+chef-cookbooks/postfix#134). Fix spotted by @PeterGrace.</li>
+</ul>
+
+<h2>0.4.0 (2017-08-10)</h2>
+
+<ul>
+<li>Ignore build-time files from the vendored cookbook</li>
+<li>Update build dependencies and build against Chef 12 and Chef 13 (drops support for &lt; 12.18.31)</li>
+</ul>
+
+<h3>0.3.0</h3>
+
+<ul>
+<li>Update to postfix cookbook v5.0</li>
+<li>Require Chef 12+</li>
+</ul>
+
+<h3>0.2.0</h3>
+
+<ul>
+<li>Upgrade to align with postfix cookbook v3.6.0, in particular update all dynamic attributes to be normal precedence
+so that they win over the default attributes provided by [postfix:_common]</li>
+</ul>
+
+<h3>0.1.0</h3>
+
+<ul>
+<li>Initial version, never tagged</li>
+</ul>
+
+    </div>
+  </div>
+</main>
+
+
+<div class="detail-sidebar">
+  <h4>Added to MiniMart</h4>
+  <p>September 09, 2020</p>
+  <h4>Maintainer</h4>
+  <p>Andrew Coulton</p>
+  <dl class="platform-list">
+    <dt>Supported Platforms</dt>
+    
+      <dd><i class="icon-ubuntu" title="Ubuntu"></i></dd>
+    
+  </dl>
+  
+  <a href="https://github.com/ingenerator/chef-postfix-relay" class="button detail-sidebar__halfbutton">Source</a>
+  
+  
+  <a href="https://github.com/ingenerator/chef-postfix-relay/issues" class="button detail-sidebar__halfbutton">Issues</a>
+  
+  <a href="../../cookbook_files/postfix-relay/0_4_1/postfix-relay-0.4.1.tar.gz" class="button detail-sidebar__button">Download</a>
+</div>
+
+<script>
+$(function () {
+  $('.tab-container').tabslet();
+  $('.cookbook-version-selector').change(function () {
+    document.location.href = encodeURI($(this).val());
+  });
+  $('#cookbook-search-form').submit(function (ev) {
+    ev.preventDefault();
+    var searchValue, searchPath;
+    searchValue = $(this).find('input[name="query"]').val();
+    searchPath  = $(this).attr('action');
+    document.location.href = encodeURI(searchPath + searchValue);
+  });
+});
+</script>
+
+  </div>
+
+  <footer class="footer">
+    <a href="http://www.madglory.com" target="_blank">
+      Powered by
+      <span class="footer__logo">
+        <img src="../../assets/images/mad-glory-logo.png" alt="Mad Glory" />
+      </span>
+    </a>
+  </footer>
+</body>
+</html>

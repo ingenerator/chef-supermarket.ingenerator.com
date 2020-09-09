@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniMart</title>
+
+  <!-- fonts -->
+  <link href='//fonts.googleapis.com/css?family=Maven+Pro:400,700' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700,600' rel='stylesheet' type='text/css'>
+  <!-- css -->
+  <link rel="stylesheet" href="../../assets/stylesheets/application.min.css" />
+  <!-- js -->
+  <script src="../../assets/javascripts/application.min.js"></script>
+</head>
+<body>
+  <a href="../../index.html">
+  <header class="header-slim">
+    <div class="header-slim__container">
+      <h1 class="header-slim__title">Welcome to MiniMart</h1>
+      <h2 class="header-slim__subtitle">Always open and always open sourced.</h2>
+    </div>
+  </header>
+  </a>
+
+  <div class="outer-wrapper">
+    <form action="../../index.html#search/" method="GET" id="cookbook-search-form">
+  <div class="search">
+    <div class="search__td">
+      <input name="query" type="search">
+    </div>
+    <div class="search__td search__td--btn">
+      <button type="submit">Search</button>
+    </div>
+  </div>
+</form>
+
+<main class="detail-content">
+  <h1 class="detail-content__title">
+    ingenerator-php
+    <span>
+      (6) Versions
+      <select class="cookbook-version-selector">
+        <option disabled selected>
+          <small>1.0.0</small>
+        </option>
+        
+          
+            <option value="../../cookbooks/ingenerator-php/3.0.0.html">3.0.0</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-php/2.1.0.html">2.1.0</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-php/2.0.1.html">2.0.1</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-php/2.0.0.html">2.0.0</option>
+          
+        
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-php/0.1.0.html">0.1.0</option>
+          
+        
+      </select>
+    </span>
+  </h1>
+
+  <p>Installs PHP with standard config and helpers for inGenerator projects</p>
+  <code class="install-instructions">cookbook 'ingenerator-php', '~> 1.0.0'</code>
+
+  <div class="tab-container">
+    <ul class="detail-content__tabs">
+      <li><a href="#readme-tab">Readme</a></li>
+      <li><a href="#dependencies-tab">Dependencies</a></li>
+      <li><a href="#changelog-tab">Changelog</a></li>
+    </ul>
+
+    <div id="readme-tab" class="markdown">
+      <h1>inGenerator Standard PHP cookbook</h1>
+
+<p><a href="https://travis-ci.org/ingenerator/chef-ingenerator-php"><img src="https://travis-ci.org/ingenerator/chef-ingenerator-php.png?branch=1.x" alt="Build Status"></a></p>
+
+<p><code>ingenerator-php</code> provides standard PHP configuration and related tooling for our applications using Chef.</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>Chef 12.13 or higher</li>
+<li><strong>Ruby 2.3 or higher</strong></li>
+</ul>
+
+<h2>Installation</h2>
+
+<p>We recommend adding to your <code>Berksfile</code> and using <a href="http://berkshelf.com/">Berkshelf</a>:</p>
+
+<pre><code class="ruby">cookbook &#39;ingenerator-php&#39;, git: &#39;git://github.com/ingenerator/chef-ingenerator-php&#39;, branch: &#39;master&#39;
+</code></pre>
+
+<p>Have your main project cookbook <em>depend</em> on ingenerator-php by editing the <code>metadata.rb</code> for your cookbook.</p>
+
+<pre><code class="ruby"># metadata.rb
+depends &#39;ingenerator-php&#39;
+</code></pre>
+
+<h2>Usage</h2>
+
+<p>For the simplest cases, add the default recipe to your <code>run_list</code>:</p>
+
+<pre><code class="ruby"># In a role
+&quot;run_list&quot; : [
+  &quot;recipe[ingenerator-php::default]&quot;
+]
+
+# In a recipe - note your cookbook must declare a dependency in metadata.rb as above
+include_recipe &quot;ingenerator-php::default&quot;
+</code></pre>
+
+<p>The default recipe executes the following steps:</p>
+
+<table><thead>
+<tr>
+<th>Recipe</th>
+<th>Action</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>install_php</td>
+<td>Installs php and any additional modules</td>
+</tr>
+<tr>
+<td>share_inis</td>
+<td>Configures php to share ini files between apache, cgi and cli</td>
+</tr>
+<tr>
+<td>composer</td>
+<td>Installs and updates composer globally for all users</td>
+</tr>
+</tbody></table>
+
+<p>To customise behaviour, include any or all of these recipes directly rather than relying on the default.</p>
+
+<h2>Resources</h2>
+
+<h3><code>composer_binary</code></h3>
+
+<p>Used by the <code>composer</code> recipe to install and update the composer executable</p>
+
+<h3><code>composer_dependencies</code></h3>
+
+<p>Use this resource in your project-specific recipes to run composer install against a project&#39;s composer.json. It
+requires a composer.lock to be present, and will fail if this is missing. By default this will optimise the
+autoloader and activate apcu caching, unless running in the :localdev environment. Customise this behaviour
+with node attributes for now (though will in due course be added as resource options).</p>
+
+<pre><code class="ruby">composer_dependencies path_to_project_root_dir do
+  run_as &#39;any-user-except-root&#39;
+end
+</code></pre>
+
+<h2>Attributes</h2>
+
+<p>The cookbook defines a number of attributes for php.ini settings that we set differently to
+the Ubuntu package defaults. See <a href="attributes/">the attributes files</a> for details. You can
+override these or add further directives in your own cookbooks or roles.</p>
+
+<h3>Testing</h3>
+
+<p>See the <a href=".travis.yml">.travis.yml</a> file for the current test scripts.</p>
+
+<h2>Contributing</h2>
+
+<ol>
+<li>Fork the project</li>
+<li>Create a feature branch corresponding to your change</li>
+<li>Create specs for your change</li>
+<li>Create your changes</li>
+<li>Create a Pull Request on github</li>
+</ol>
+
+<h2>License &amp; Authors</h2>
+
+<ul>
+<li>Author:: Andrew Coulton (<a href="mailto:andrew@ingenerator.com">andrew@ingenerator.com</a>)</li>
+</ul>
+
+<pre><code class="text">Copyright 2012-2013, inGenerator Ltd
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+
+    </div>
+
+    <div id="dependencies-tab">
+      
+        <ul class="dependency-list">
+          
+            
+            
+              <li><a href="../../cookbooks/ingenerator-helpers/1.1.0.html">ingenerator-helpers ~> 1.0</a></li>
+            
+          
+            
+            
+              <li>php ~> 2.2</li>
+            
+          
+        </ul>
+      
+    </div>
+
+    <div id="changelog-tab" class="markdown">
+      <h1>Change Log</h1>
+
+<p>All notable changes to this project will be documented in this file.
+This project adheres to <a href="http://semver.org/">Semantic Versioning</a>. Note that
+0.x versions may be breaking, per the semver standard.</p>
+
+<h2>Unreleased</h2>
+
+<h2>1.0.0 (2017-02-24)</h2>
+
+<ul>
+<li>Add <code>composer_dependencies</code> resource to provision dependencies, by default
+optimising the autoloader and enabling APCU autoloader unless in local dev.
+This resource needs to be triggered manually in your own code. It DOES NOT
+manually set the composer home directory any more.</li>
+<li>[BREAKING] Drop dependency on zircote/chef-composer and provide an updated
+<code>composer_binary</code> resource for installing composer on a node using the
+default composer-setup script now provided by composer. Will now throw an
+exception if the legacy <code>composer[install_path]</code> attribute is still defined.</li>
+<li>[BREAKING] Always display errors in development and buildslave, hide in
+production. Log errors to syslog by default.</li>
+<li>Automatically enables revalidating opcode cache file timestamps in dev, but
+never revalidates in production. Removes apc file-caching options.</li>
+<li>Change to defining individual default directives / attributes instead of as a
+complete hash - this prevents the defaults here from splatting any that are
+defined in other cookbooks earlier in the run. This is potentially breaking,
+but only in that the old behaviour was buggy and wrong and doesn&#39;t seem to have
+bitten us yet.</li>
+<li>[BREAKING] Update to php cookbook 2.2. This no longer quotes values in php.ini
+by default : you will need to manually add quotes to the attribute values in
+<code>node[&#39;php&#39;][&#39;directives&#39;]</code>.</li>
+<li>Use ingenerator-helpers and <code>node_environment</code> instead of chef-sugar to trigger
+provisioning of xdebug remote debugging options</li>
+</ul>
+
+<h2>0.1.0 (2017-02-23)</h2>
+
+<ul>
+<li>First tagged release</li>
+</ul>
+
+    </div>
+  </div>
+</main>
+
+
+<div class="detail-sidebar">
+  <h4>Added to MiniMart</h4>
+  <p>September 09, 2020</p>
+  <h4>Maintainer</h4>
+  <p>Andrew Coulton</p>
+  <dl class="platform-list">
+    <dt>Supported Platforms</dt>
+    
+      <dd><i class="icon-ubuntu" title="Ubuntu"></i></dd>
+    
+  </dl>
+  
+  <a href="https://github.com/ingenerator/chef-ingenerator-php" class="button detail-sidebar__halfbutton">Source</a>
+  
+  
+  <a href="https://github.com/ingenerator/chef-ingenerator-php/issues" class="button detail-sidebar__halfbutton">Issues</a>
+  
+  <a href="../../cookbook_files/ingenerator-php/1_0_0/ingenerator-php-1.0.0.tar.gz" class="button detail-sidebar__button">Download</a>
+</div>
+
+<script>
+$(function () {
+  $('.tab-container').tabslet();
+  $('.cookbook-version-selector').change(function () {
+    document.location.href = encodeURI($(this).val());
+  });
+  $('#cookbook-search-form').submit(function (ev) {
+    ev.preventDefault();
+    var searchValue, searchPath;
+    searchValue = $(this).find('input[name="query"]').val();
+    searchPath  = $(this).attr('action');
+    document.location.href = encodeURI(searchPath + searchValue);
+  });
+});
+</script>
+
+  </div>
+
+  <footer class="footer">
+    <a href="http://www.madglory.com" target="_blank">
+      Powered by
+      <span class="footer__logo">
+        <img src="../../assets/images/mad-glory-logo.png" alt="Mad Glory" />
+      </span>
+    </a>
+  </footer>
+</body>
+</html>

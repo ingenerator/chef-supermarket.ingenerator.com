@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniMart</title>
+
+  <!-- fonts -->
+  <link href='//fonts.googleapis.com/css?family=Maven+Pro:400,700' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700,600' rel='stylesheet' type='text/css'>
+  <!-- css -->
+  <link rel="stylesheet" href="../../assets/stylesheets/application.min.css" />
+  <!-- js -->
+  <script src="../../assets/javascripts/application.min.js"></script>
+</head>
+<body>
+  <a href="../../index.html">
+  <header class="header-slim">
+    <div class="header-slim__container">
+      <h1 class="header-slim__title">Welcome to MiniMart</h1>
+      <h2 class="header-slim__subtitle">Always open and always open sourced.</h2>
+    </div>
+  </header>
+  </a>
+
+  <div class="outer-wrapper">
+    <form action="../../index.html#search/" method="GET" id="cookbook-search-form">
+  <div class="search">
+    <div class="search__td">
+      <input name="query" type="search">
+    </div>
+    <div class="search__td search__td--btn">
+      <button type="submit">Search</button>
+    </div>
+  </div>
+</form>
+
+<main class="detail-content">
+  <h1 class="detail-content__title">
+    ingenerator-mysql
+    <span>
+      (8) Versions
+      <select class="cookbook-version-selector">
+        <option disabled selected>
+          <small>0.5.1</small>
+        </option>
+        
+          
+            <option value="../../cookbooks/ingenerator-mysql/0.6.0.html">0.6.0</option>
+          
+        
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-mysql/0.5.0.html">0.5.0</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-mysql/0.4.1.html">0.4.1</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-mysql/0.4.0.html">0.4.0</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-mysql/0.3.0.html">0.3.0</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-mysql/0.2.0.html">0.2.0</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-mysql/0.1.0.html">0.1.0</option>
+          
+        
+      </select>
+    </span>
+  </h1>
+
+  <p>Standard mySQL installation for our applications, including relevant PHP and application config</p>
+  <code class="install-instructions">cookbook 'ingenerator-mysql', '~> 0.5.1'</code>
+
+  <div class="tab-container">
+    <ul class="detail-content__tabs">
+      <li><a href="#readme-tab">Readme</a></li>
+      <li><a href="#dependencies-tab">Dependencies</a></li>
+      <li><a href="#changelog-tab">Changelog</a></li>
+    </ul>
+
+    <div id="readme-tab" class="markdown">
+      <h1>inGenerator MySQL cookbook</h1>
+
+<p><a href="https://travis-ci.org/ingenerator/chef-ingenerator-mysql"><img src="https://travis-ci.org/ingenerator/chef-ingenerator-mysql.png?branch=0.x" alt="Build Status"></a></p>
+
+<p>The <code>ingenerator-mysql</code> cookbook supports standard installation of mySQL for our applications
+that use it, and also defines attributes and recipes that support applications that depend on
+it. For example, if used with our <code>ingenerator-php</code> cookbook, the php mysql extension will be
+installed as part of the php install.</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>Chef 12.18 or higher</li>
+<li><strong>Ruby 2.3 or higher</strong></li>
+</ul>
+
+<h2>Installation</h2>
+
+<p>We recommend adding to your <code>Berksfile</code> and using <a href="http://berkshelf.com/">Berkshelf</a>:</p>
+
+<pre><code class="ruby">source &#39;https://chef-supermarket.ingenerator.com&#39;
+cookbook &#39;ingenerator-mysql&#39;, &#39;~&gt;0.4.0&#39;
+</code></pre>
+
+<p>Have your main project cookbook <em>depend</em> on ingenerator-mysql by editing the <code>metadata.rb</code> for your cookbook.</p>
+
+<pre><code class="ruby"># metadata.rb
+depends &#39;ingenerator-mysql&#39;
+</code></pre>
+
+<h2>User passwords</h2>
+
+<blockquote>
+<p>By default, the root password is set to &#39;mysql&#39; and the app user password to the project name. This is valid for
+development environments (which should not have secure credentials for anything) but you <strong>MUST</strong> ensure you define
+secure passwords for a any production server. Generally available QA and similar hosts that could be compromised
+should also have secure passwords, different to the ones used in production.
+The recipes will emit a warning log if you deploy outside Vagrant with an insecure password.</p>
+</blockquote>
+
+<h2>Recipes</h2>
+
+<h3>No default recipe</h3>
+
+<p>As this cookbook provides both server and client related mysql things, there is no default recipe.</p>
+
+<h3><code>ingenerator-mysql::server</code></h3>
+
+<p>This recipe will:</p>
+
+<ul>
+<li>install a mysql server</li>
+<li>manage the mysql root password</li>
+<li>install the mysql client, ruby mysql gem and database bindings for use in chef</li>
+<li>provision a default mysql client options file at /root/.my.cnf with credentials for root database access</li>
+<li>create a schema for the application</li>
+<li>create a non-root user account for the application - by default only with permissions on the app schema</li>
+<li>if running on vagrant, bind mysql to any interface and allow remote root access so workbench etc work from the host</li>
+</ul>
+
+<h3><code>ingenerator-mysql::app_db_server</code></h3>
+
+<p>This is intended to be run on the database server instance for an application (and is included with
+the standard <code>ingenerator-mysql::server</code> recipe above). It provisions an <code>application_database</code>
+resource for the default primary schema defined in <code>node[&#39;project&#39;][&#39;services&#39;][&#39;db&#39;][&#39;schema&#39;]</code>.</p>
+
+<h3><code>ingenerator-mysql::dev-db</code></h3>
+
+<p>This recipe will:</p>
+
+<ul>
+<li>provision a standard basic development database if missing</li>
+<li>run SQL files against the development database if configured or if the dump files have changed</li>
+</ul>
+
+<p>To use it, add SQL files that take the desired action - generally, drop an entire table and recreate it - as
+cookbook files in your project.</p>
+
+<pre><code class="sql">/* application-cookbook/files/default/dev_db/users.sql */
+CREATE SCHEMA myapplication IF NOT EXIST;
+DROP TABLE IF EXISTS users;
+CREATE TABLE users /*....
+</code></pre>
+
+<p>Add each file to the <code>node[&#39;mysql&#39;][&#39;dev_db&#39;][&#39;sql_files&#39;]</code> hash - for example:</p>
+
+<pre><code class="ruby">node.default[&#39;mysql&#39;][&#39;dev_db&#39;][&#39;sql_files&#39;][&#39;application-coobook::dev_db/users.sql&#39;] = true
+</code></pre>
+
+<p>By default, the files will be copied to a local path on your machine in order to detect if they
+have changed since the last deploy. Any changed files will be passed to mysql as root during
+deployment.</p>
+
+<p>You can force a reprovision by setting <code>node[&#39;mysql&#39;][&#39;dev_db&#39;][&#39;recreate_always&#39;]</code> to true -
+for example, you&#39;d probably do so in a build slave role to ensure the test db was always clean.</p>
+
+<p>Alternatively you can force a one-off reprovision with an environment variable - eg
+<code>$ RECREATE_DEV_DB=1 architecture/provision dev-server</code>.</p>
+
+<p>You should consider setting the attribute from an environment variable in your Vagrantfile to
+allow the same workflow on your host machine.</p>
+
+<blockquote>
+<p><strong>DANGER!</strong>
+If included, this recipe will without warning run your SQL scripts, probably wiping your entire
+database. To reduce the risk you accidentally run it on a production box, it will fail if the
+root password is anything other than &quot;mysql&quot;. It should be obvious that inclusion of this recipe
+should be treated with care.</p>
+</blockquote>
+
+<h2><code>ingenerator-mysql::local_admins</code></h2>
+
+<p>This recipe is not included by default. If included it will generate a <code>mysql_local_admin</code> for
+each user defined in the <code>node[&#39;mysql&#39;][&#39;local_admins&#39;]</code> hash of <code>username =&gt; options</code>.
+Users are only created if they have a <code>create</code> attribute set to true. Use this when you
+want to define system users before mysql is installed but keep their access definition
+in one place.</p>
+
+<p>If run in the <code>:localdev</code> environment then by default this will also create a user with
+root privileges for the <code>vagrant</code> local system user.</p>
+
+<p>For example:</p>
+
+<pre><code class="ruby"># your/project/cookbook/recipes/users.rb
+user &#39;phil&#39;
+sudo &#39;phil&#39;
+
+node.default[&#39;mysql&#39;][&#39;local_admins&#39;][&#39;phil&#39;][&#39;create&#39;] = true
+# Optionally, you can also set a custom default_database and privileges in these
+# attributes.
+
+# And then add ingenerator-mysql::local_admins to your runlist somewhere after
+# mysql is installed and configured.
+</code></pre>
+
+<h2>Attributes</h2>
+
+<p>The cookbook provides and is controlled by a number of default attributes:</p>
+
+<ul>
+<li><a href="attributes/default.rb">default</a> - customisation of mysql config and generic mysql attributes</li>
+<li><a href="attributes/app_db.rb">app_db</a> - attributes related to the application database, including tweaks to related cookbooks</li>
+</ul>
+
+<h2>Resources</h2>
+
+<h3>application_database</h3>
+
+<p>This resource will:</p>
+
+<ul>
+<li>create a schema for the application to use</li>
+<li>create / update a restricted-privilege database user for use by general
+application code - named with the project name by default</li>
+<li>optionally, if the database is empty, seed it from a file in /tmp/database-seeds/{schema.sql}</li>
+</ul>
+
+<p>If a database seed file is provided, it will be piped to the schema and then
+deleted. If it is present on a subsequent run and the database is not empty,
+an exception will be thrown and provisioning aborted.</p>
+
+<p>The resouce currently has limited direct options, most behaviour is governed by the
+<code>node[&#39;project&#39;][&#39;services&#39;][&#39;db&#39;]</code> attributes.</p>
+
+<p>The application database user, by default, can only connect from localhost but
+you can configure this by setting the
+<code>node[&#39;project&#39;][&#39;services&#39;][&#39;db&#39;][&#39;connect_anywhere&#39;]</code> attribute to true. It
+has limited permissions which can be customised by setting the appropriate key
+in <code>node[&#39;project&#39;][&#39;services&#39;][&#39;db&#39;][&#39;privileges&#39;][{mysql permission name}]</code>
+to true.</p>
+
+<blockquote>
+<p><strong>Security Considerations!</strong>
+Granting granting elevated privileges to a user that runs in the context of a web
+application is a likely security hole. Before activating additional privileges for
+the application user you should consider whether you can either use a separate
+database user (for example, for command line admin tasks that run outside the web
+context) or implement a message queue or similar so that the web process can only
+trigger a set of whitelisted application use cases which are executed by a
+privileged user in a separate process.</p>
+</blockquote>
+
+<h3>user_mysql_config</h3>
+
+<p>Provisions a <code>.my.cnf</code> options file for the mysql client with the specified connection
+details. Optionally, you can enforce safe queries, a default character set and a default
+database.</p>
+
+<pre><code class="ruby">user_mysql_config &#39;/home/me/.my.cnf&#39; do
+  user            &#39;me&#39;
+  mode            0600
+  connection      { username: &#39;me&#39;, password: &#39;secret&#39;, host: &#39;127.0.0.1&#39;}
+  # or use node.mysql_root_connection() for the current root credentials
+  database        &#39;my-schema&#39;
+
+  # enforce the safe-updates mode of mysql where a PK is required to update or delete
+  safe_updates    true
+
+  default_charset &#39;utf8&#39;
+end
+</code></pre>
+
+<h3>mysql_default_timezone</h3>
+
+<p>Uses <code>mysql_tzinfo_to_sql</code> to populate mysql timezones from <code>/usr/share/zoneinfo</code>
+then sets a custom configuration file for the default timezone. See the
+custom_config recipe for usage details. The default timezone is Europe/London -
+override this with the node.mysql.default-time-zone attribute if required.</p>
+
+<p>[!!] Note that this does not schedule any future updates of the timezone data -
+if you&#39;re not routinely building fresh boxes you will need to schedule this.</p>
+
+<h3>mysql_local_admin</h3>
+
+<p>Provisions a database user for a system user, and drops a <code>.my.cnf</code> in the user&#39;s
+home directory. By default users can do most data manipulation but not modify the
+schema. You can customise the privileges by passing your own array to the resource.</p>
+
+<p>The user password will come from:</p>
+
+<ul>
+<li>A <code>password</code> option passed to the resource</li>
+<li>A <code>node[&#39;mysql&#39;][&#39;local_admins&#39;][username][&#39;password&#39;]</code> attribute</li>
+<li>A random secure password that will be persisted into the above node attribute
+for reuse.</li>
+</ul>
+
+<h3>Testing</h3>
+
+<p>See the <a href=".travis.yml">.travis.yml</a> file for the current test scripts.</p>
+
+<h2>Contributing</h2>
+
+<ol>
+<li>Fork the project</li>
+<li>Create a feature branch corresponding to your change</li>
+<li>Create specs for your change</li>
+<li>Create your changes</li>
+<li>Create a Pull Request on github</li>
+</ol>
+
+<h2>License &amp; Authors</h2>
+
+<ul>
+<li>Author:: Andrew Coulton (<a href="mailto:andrew@ingenerator.com">andrew@ingenerator.com</a>)</li>
+</ul>
+
+<pre><code class="text">Copyright 2012-2013, inGenerator Ltd
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+
+    </div>
+
+    <div id="dependencies-tab">
+      
+        <ul class="dependency-list">
+          
+            
+            
+              <li>apt ~> 6.0</li>
+            
+          
+            
+            
+              <li>database ~> 6.0</li>
+            
+          
+            
+            
+              <li><a href="../../cookbooks/ingenerator-helpers/1.1.0.html">ingenerator-helpers ~> 1.0</a></li>
+            
+          
+        </ul>
+      
+    </div>
+
+    <div id="changelog-tab" class="markdown">
+      <h1>Change Log</h1>
+
+<p>All notable changes to this project will be documented in this file.
+This project adheres to <a href="http://semver.org/">Semantic Versioning</a>. Note that
+0.x versions may be breaking, per the semver standard.</p>
+
+<h2>Unreleased</h2>
+
+<h2>0.5.1 (2019-02-25)</h2>
+
+<ul>
+<li>[BUG] mysql config files need to be world-readable. If not then mysql will silently IGNORE them and you will spend
+ages trying to work out why the config settings aren&#39;t being applied. Worse, the pre-start command on ubuntu runs
+as root so it can read them and will fail with an error if they have invalid values, but then the actual start command
+runs as mysql so won&#39;t see them. FFS.</li>
+</ul>
+
+<h2>0.5.0 (2019-02-17)</h2>
+
+<ul>
+<li>[BREAKING] Ensure chef isn&#39;t trying to move the mysql data directory - leave it configured as /var/lib/mysql and
+bind-mount it if you need it somewhere else. This is <em>much</em> easier than mucking about with config, apparmor, etc.
+Note you need the mount point provisioned before you install the mysql package.</li>
+<li>[BREAKING] Drop dependency on mysql cookbook, just install from packages with ubuntu default directories etc -
+service will be <code>mysql</code> as standard not the half-broken <code>mysql-default</code> the old cookbook tries to provision:
+
+<ul>
+<li>REMOVES all concept of root having a password at all - uses local socket auth</li>
+<li>REMOVES the /root/.my.cnf with password - uses local socket authentication for the root user per mysql/ubuntu
+default</li>
+<li>COMBINES all custom config into a single my.cnf to ensure it overrides the mysql stuff</li>
+<li>DROPS various internal resources and recipes</li>
+<li>LOSES a bunch of spec coverage because this cookbook only has to live another couple of months</li>
+<li>CHANGES the paths that are managed by the mysql logrotate we provision</li>
+</ul></li>
+<li>[BREAKING] Drop dependency on mysql2_chef_gem cookbook, just install the gem manually in our server recipe</li>
+<li>[BREAKING] Now triggers our php cookbook to install php7.2-mysql package rather than php5-mysql</li>
+<li>[BREAKING] Now expects to be on Ubuntu 18.04</li>
+<li>[BREAKING] Drop chef12 support</li>
+</ul>
+
+<h2>0.4.1 (2017-08-10)</h2>
+
+<ul>
+<li>Fix exclusion of build-time files from vendored cookbook</li>
+</ul>
+
+<h2>0.4.0 (2017-08-09)</h2>
+
+<ul>
+<li>Exclude build-time code from generated cookbook (in the hope this may improve
+build time)</li>
+<li>Fix namespace collision deprecation warnings in Chef 12</li>
+<li>[POTENTIALLY BREAKING] Require v2 of mysql2_chef_gem for Chef 13 compatibility
+
+<ul>
+<li>this may cause issues with downstream dependencies.</li>
+</ul></li>
+<li>Update build dependencies and build against Chef 12 and Chef 13</li>
+</ul>
+
+<h2>0.3.0 (2017-02-23)</h2>
+
+<ul>
+<li>Remove explicit install of libmysqlclient-dev - this was a workaround for
+<a href="https://github.com/chef-cookbooks/mysql/issues/457">https://github.com/chef-cookbooks/mysql/issues/457</a> which is now fixed. Bump
+minimum mysql cookbook version to 8.2.0 to ensure that fix is present.</li>
+<li>[BREAKING FEATURE] Move app_db_server logic into an application_database
+resource to allow simpler reuse on projects with multiple schemas on a single
+instance. Also added the ability to seed a new database - eg when moving to
+a new instance - by dropping a sql file in /tmp/database-seeds.</li>
+<li>[FEATURE] Add mysql_local_admin to provision database access (user and client
+config) for system users that should have access to the db.</li>
+<li>[BREAKING FEATURE] Add mysql_default_timezone resource and provision by
+default to Europe/London - customise with the node.mysql.default-time-zone
+attribute. Throws a LegacyAttributeDefinitionError if there&#39;s a default-time-zone
+attribute in the custom_config definition.</li>
+<li>[FEATURE] Add user_mysql_config resource and provision a default .my.cnf for
+root at /root/.my.cnf when installing a mysql server</li>
+<li>Updated to the 6.0 series apt cookbook</li>
+<li>[BUGFIX] Add a workaround to fix the default mysql logrotate config that no
+longer works per chef-cookbooks/mysql#294 due to the multi-instance setup.
+Solution inspired by <a href="https://github.com/flatrocks/cookbook-mysql_logrotate">https://github.com/flatrocks/cookbook-mysql_logrotate</a>.</li>
+<li>Updated to the 6.x series database cookbook</li>
+</ul>
+
+<h2>0.2.0 (2016-09-09)</h2>
+
+<ul>
+<li>[BREAKING] Updated to new mysql and database cookbooks - this will break lots
+of things. Ensure you deploy this to a clean instance, not over the top of
+provisioning delivered by a previous version of the cookbook.</li>
+<li>[BREAKING] Now throws exceptions if using insecure default passwords outside
+a :localdev or :buildslave environment.</li>
+<li>[BREAKING] No longer listens on 0.0.0.0 on development boxes by default, use
+ssh forwarding.</li>
+<li>[BREAKING] No longer supports the out-of-box debian-sys-maint or replication
+users - provision them separately if required.</li>
+<li>[FEATURE] Provides a <code>node.mysql_root_connection()</code> method that returns a hash
+with everything you need to connect as root. Note that the keys are symbols,
+not strings.</li>
+</ul>
+
+<h2>0.1.0 (2016-09-06)</h2>
+
+<ul>
+<li>First tagged release</li>
+</ul>
+
+    </div>
+  </div>
+</main>
+
+
+<div class="detail-sidebar">
+  <h4>Added to MiniMart</h4>
+  <p>September 09, 2020</p>
+  <h4>Maintainer</h4>
+  <p>Andrew Coulton</p>
+  <dl class="platform-list">
+    <dt>Supported Platforms</dt>
+    
+      <dd><i class="icon-ubuntu" title="Ubuntu"></i></dd>
+    
+  </dl>
+  
+  <a href="https://github.com/ingenerator/chef-ingenerator-mysql" class="button detail-sidebar__halfbutton">Source</a>
+  
+  
+  <a href="https://github.com/ingenerator/chef-ingenerator-mysql/issues" class="button detail-sidebar__halfbutton">Issues</a>
+  
+  <a href="../../cookbook_files/ingenerator-mysql/0_5_1/ingenerator-mysql-0.5.1.tar.gz" class="button detail-sidebar__button">Download</a>
+</div>
+
+<script>
+$(function () {
+  $('.tab-container').tabslet();
+  $('.cookbook-version-selector').change(function () {
+    document.location.href = encodeURI($(this).val());
+  });
+  $('#cookbook-search-form').submit(function (ev) {
+    ev.preventDefault();
+    var searchValue, searchPath;
+    searchValue = $(this).find('input[name="query"]').val();
+    searchPath  = $(this).attr('action');
+    document.location.href = encodeURI(searchPath + searchValue);
+  });
+});
+</script>
+
+  </div>
+
+  <footer class="footer">
+    <a href="http://www.madglory.com" target="_blank">
+      Powered by
+      <span class="footer__logo">
+        <img src="../../assets/images/mad-glory-logo.png" alt="Mad Glory" />
+      </span>
+    </a>
+  </footer>
+</body>
+</html>

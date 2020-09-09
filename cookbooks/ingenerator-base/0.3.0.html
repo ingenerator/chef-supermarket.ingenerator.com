@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniMart</title>
+
+  <!-- fonts -->
+  <link href='//fonts.googleapis.com/css?family=Maven+Pro:400,700' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700,600' rel='stylesheet' type='text/css'>
+  <!-- css -->
+  <link rel="stylesheet" href="../../assets/stylesheets/application.min.css" />
+  <!-- js -->
+  <script src="../../assets/javascripts/application.min.js"></script>
+</head>
+<body>
+  <a href="../../index.html">
+  <header class="header-slim">
+    <div class="header-slim__container">
+      <h1 class="header-slim__title">Welcome to MiniMart</h1>
+      <h2 class="header-slim__subtitle">Always open and always open sourced.</h2>
+    </div>
+  </header>
+  </a>
+
+  <div class="outer-wrapper">
+    <form action="../../index.html#search/" method="GET" id="cookbook-search-form">
+  <div class="search">
+    <div class="search__td">
+      <input name="query" type="search">
+    </div>
+    <div class="search__td search__td--btn">
+      <button type="submit">Search</button>
+    </div>
+  </div>
+</form>
+
+<main class="detail-content">
+  <h1 class="detail-content__title">
+    ingenerator-base
+    <span>
+      (7) Versions
+      <select class="cookbook-version-selector">
+        <option disabled selected>
+          <small>0.3.0</small>
+        </option>
+        
+          
+            <option value="../../cookbooks/ingenerator-base/0.7.0.html">0.7.0</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-base/0.6.0.html">0.6.0</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-base/0.5.0.html">0.5.0</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-base/0.4.0.html">0.4.0</option>
+          
+        
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-base/0.2.0.html">0.2.0</option>
+          
+        
+          
+            <option value="../../cookbooks/ingenerator-base/0.1.0.html">0.1.0</option>
+          
+        
+      </select>
+    </span>
+  </h1>
+
+  <p>Basic, common, provisioning of all our instances</p>
+  <code class="install-instructions">cookbook 'ingenerator-base', '~> 0.3.0'</code>
+
+  <div class="tab-container">
+    <ul class="detail-content__tabs">
+      <li><a href="#readme-tab">Readme</a></li>
+      <li><a href="#dependencies-tab">Dependencies</a></li>
+      <li><a href="#changelog-tab">Changelog</a></li>
+    </ul>
+
+    <div id="readme-tab" class="markdown">
+      <h1>inGenerator Base cookbook</h1>
+
+<p><a href="https://travis-ci.org/ingenerator/chef-ingenerator-base"><img src="https://travis-ci.org/ingenerator/chef-ingenerator-base.png?branch=master" alt="Build Status"></a></p>
+
+<p>The <code>ingenerator-base</code> cookbook provides chef recipes, attributes and providers for 
+provisioning that should be common on all our instances. It may also contain some 
+regularly-used recipes etc that do not merit their own cookbooks.</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>Chef 12.13 or higher</li>
+<li><strong>Ruby 2.3 or higher</strong></li>
+</ul>
+
+<h2>Node environment</h2>
+
+<p>There are various places where configuration of an instance or a particular service depends on the
+environment - broadly defined as a local development box (eg Vagrant), a remote build slave, or a
+production server.</p>
+
+<p>Although chef supports a fully-featured <code>environment</code> layer as well as <code>roles</code>, these are quite
+heavyweight and involve repeating attribute overrides across projects in a way that has proved
+tricky to maintain.</p>
+
+<p>By convention, we now use a single flag in the <code>node[ingenerator][node_environment]</code> attribute, which
+defaults to <code>:production</code> but should be overridden in the appropriate project-level role definition
+/ Vagrantfile.</p>
+
+<p>This flag can then be used at attribute / recipe level to control the default behaviour of a cookbook,
+so that the environment-specific variations are visible inline with the rest of the cookbook setup
+for easier tracing and debugging.</p>
+
+<p>Usually, you should not toggle behaviour directly on this flag, but use it to initialise well-named
+behaviour-specific attributes to a suitable value. This then allows further overriding of that logic
+at the project / role level.</p>
+
+<p>For example:</p>
+
+<pre><code class="ruby"># attributes/default.rb
+if node[&#39;ingenerator&#39;][&#39;node_environment&#39;] === :localdev
+  default[&#39;service&#39;][&#39;do_thing&#39;] = false
+else
+  default[&#39;service&#39;][&#39;do_thing&#39;] = true
+end
+
+# recipes/thing.rb
+if node[&#39;service&#39;][&#39;do_thing&#39;]
+  thing_service do
+    action :install
+  end
+end
+</code></pre>
+
+<h2>Installation</h2>
+
+<p>We recommend adding to your <code>Berksfile</code> and using <a href="http://berkshelf.com/">Berkshelf</a>:</p>
+
+<pre><code class="ruby">cookbook &#39;ingenerator-base&#39;, git: &#39;git://github.com/ingenerator/chef-ingenerator-base&#39;, branch: &#39;master&#39;
+</code></pre>
+
+<p>Have your main project cookbook <em>depend</em> on ingenerator-base by editing the <code>metadata.rb</code> for your cookbook.</p>
+
+<pre><code class="ruby"># metadata.rb
+depends &#39;ingenerator-base&#39;
+</code></pre>
+
+<p>You must also specify a project-specific custom SSH port in the <code>node[&#39;ssh&#39;][&#39;host_port&#39;]</code> attribute (eg
+in a project-config role). If you do not specify this attribute, provisioning will fail.</p>
+
+<p>You usually don&#39;t want to actually use the custom SSH port for build slaves or local development (vagrant)
+boxes as this complicates those setups. If you specify <code>node[&#39;ingenerator&#39;][&#39;node_environment&#39;]</code> as either
+<code>:localdev</code> or <code>:buildslave</code>, the cookbook will still check that a valid host port has been configured,
+but will use port 22 rather than the specified port.</p>
+
+<h2>Recipes</h2>
+
+<h3>Default recipe</h3>
+
+<p>The <code>ingenerator-base::default</code> recipe will:</p>
+
+<ul>
+<li>run the &quot;apt::default&quot; recipe to ensure all apt sources are up to date</li>
+<li>install any of the enabled packages from the node[&#39;base&#39;][&#39;packages&#39;] hash - by default this includes git</li>
+<li>disable and stop the &quot;chef-client&quot; service - we manually run chef-solo when required</li>
+<li>set the system timezone to UTC</li>
+<li>creates a persistent 1G swap file</li>
+<li>set the ssh port to a custom value (although always 22 on a build slave or local dev box)</li>
+<li>install and configure a software firewall to block all but SSH, http and https (unless in <code>:localdev</code>)</li>
+</ul>
+
+<h2>Attributes</h2>
+
+<p>The cookbook provides and is controlled by a number of default attributes:</p>
+
+<ul>
+<li><a href="attributes/default.rb">default</a> - attributes in the <code>base</code> group control operation of recipes in this cookbook</li>
+<li><a href="attributes/project.rb">project</a> - provide central project configuration - you will generally extend and alter these
+in your roles or app cookbooks.</li>
+</ul>
+
+<h2>Helpers</h2>
+
+<p>You can use these helpers from recipes in cookbooks that depend on ingenerator-base:</p>
+
+<ul>
+<li><code>node_environment</code> to get the node environment flag configured for this instance.</li>
+<li><code>is_environment?(env)</code> to check if the <code>node_environment</code> has been set to a given value.</li>
+</ul>
+
+<h3>Testing</h3>
+
+<p>See the <a href=".travis.yml">.travis.yml</a> file for the current test scripts.</p>
+
+<h2>Contributing</h2>
+
+<ol>
+<li>Fork the project</li>
+<li>Create a feature branch corresponding to your change</li>
+<li>Create specs for your change</li>
+<li>Create your changes</li>
+<li>Create a Pull Request on github</li>
+</ol>
+
+<h2>License &amp; Authors</h2>
+
+<ul>
+<li>Author:: Andrew Coulton (<a href="mailto:andrew@ingenerator.com">andrew@ingenerator.com</a>)</li>
+</ul>
+
+<pre><code class="text">Copyright 2012-2013, inGenerator Ltd
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+
+    </div>
+
+    <div id="dependencies-tab">
+      
+        <ul class="dependency-list">
+          
+            
+            
+              <li>apt >= 0.0.0</li>
+            
+          
+            
+            
+              <li>firewall ~> 2.5</li>
+            
+          
+            
+            
+              <li>hostsfile >= 0.0.0</li>
+            
+          
+            
+            
+              <li><a href="../../cookbooks/ingenerator-helpers/1.1.0.html">ingenerator-helpers ~> 1.0</a></li>
+            
+          
+            
+            
+              <li>swap >= 0.0.0</li>
+            
+          
+            
+            
+              <li>timezone-ii >= 0.0.0</li>
+            
+          
+        </ul>
+      
+    </div>
+
+    <div id="changelog-tab" class="markdown">
+      <h1>Change Log</h1>
+
+<p>All notable changes to this project will be documented in this file.
+This project adheres to <a href="http://semver.org/">Semantic Versioning</a>. Note that
+0.x versions may be breaking, per the semver standard.</p>
+
+<h2>Unreleased</h2>
+
+<h2>0.3.0 (2016-09-07)</h2>
+
+<ul>
+<li>Only build numerical release branches so travis doesn&#39;t build pull requests twice</li>
+<li>Internal refactoring to extract environment helpers to shared <code>ingenerator-helpers</code> cookbook</li>
+</ul>
+
+<h2>0.2.0 (2016-09-07)</h2>
+
+<ul>
+<li>[BREAKING FEATURE] Provision basic standard firewall configuration to allow only SSH,
+http and https by default.</li>
+<li>[BREAKING FEATURE] Provision standard SSH and require each project to specify a custom host
+port for SSH connections (in node[&#39;ssh&#39;][&#39;host&#39;])</li>
+</ul>
+
+<h2>0.1.0 (2016-09-06)</h2>
+
+<ul>
+<li>First tagged release</li>
+</ul>
+
+    </div>
+  </div>
+</main>
+
+
+<div class="detail-sidebar">
+  <h4>Added to MiniMart</h4>
+  <p>September 09, 2020</p>
+  <h4>Maintainer</h4>
+  <p>Andrew Coulton</p>
+  <dl class="platform-list">
+    <dt>Supported Platforms</dt>
+    
+      <dd><i class="icon-ubuntu" title="Ubuntu"></i></dd>
+    
+  </dl>
+  
+  <a href="https://github.com/ingenerator/chef-ingenerator-base" class="button detail-sidebar__halfbutton">Source</a>
+  
+  
+  <a href="https://github.com/ingenerator/chef-ingenerator-base/issues" class="button detail-sidebar__halfbutton">Issues</a>
+  
+  <a href="../../cookbook_files/ingenerator-base/0_3_0/ingenerator-base-0.3.0.tar.gz" class="button detail-sidebar__button">Download</a>
+</div>
+
+<script>
+$(function () {
+  $('.tab-container').tabslet();
+  $('.cookbook-version-selector').change(function () {
+    document.location.href = encodeURI($(this).val());
+  });
+  $('#cookbook-search-form').submit(function (ev) {
+    ev.preventDefault();
+    var searchValue, searchPath;
+    searchValue = $(this).find('input[name="query"]').val();
+    searchPath  = $(this).attr('action');
+    document.location.href = encodeURI(searchPath + searchValue);
+  });
+});
+</script>
+
+  </div>
+
+  <footer class="footer">
+    <a href="http://www.madglory.com" target="_blank">
+      Powered by
+      <span class="footer__logo">
+        <img src="../../assets/images/mad-glory-logo.png" alt="Mad Glory" />
+      </span>
+    </a>
+  </footer>
+</body>
+</html>

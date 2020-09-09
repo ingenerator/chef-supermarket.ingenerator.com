@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniMart</title>
+
+  <!-- fonts -->
+  <link href='//fonts.googleapis.com/css?family=Maven+Pro:400,700' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700,600' rel='stylesheet' type='text/css'>
+  <!-- css -->
+  <link rel="stylesheet" href="../../assets/stylesheets/application.min.css" />
+  <!-- js -->
+  <script src="../../assets/javascripts/application.min.js"></script>
+</head>
+<body>
+  <a href="../../index.html">
+  <header class="header-slim">
+    <div class="header-slim__container">
+      <h1 class="header-slim__title">Welcome to MiniMart</h1>
+      <h2 class="header-slim__subtitle">Always open and always open sourced.</h2>
+    </div>
+  </header>
+  </a>
+
+  <div class="outer-wrapper">
+    <form action="../../index.html#search/" method="GET" id="cookbook-search-form">
+  <div class="search">
+    <div class="search__td">
+      <input name="query" type="search">
+    </div>
+    <div class="search__td search__td--btn">
+      <button type="submit">Search</button>
+    </div>
+  </div>
+</form>
+
+<main class="detail-content">
+  <h1 class="detail-content__title">
+    duplicity-backup
+    <span>
+      (11) Versions
+      <select class="cookbook-version-selector">
+        <option disabled selected>
+          <small>3.0.0</small>
+        </option>
+        
+          
+            <option value="../../cookbooks/duplicity-backup/4.1.2.html">4.1.2</option>
+          
+        
+          
+            <option value="../../cookbooks/duplicity-backup/4.1.1.html">4.1.1</option>
+          
+        
+          
+            <option value="../../cookbooks/duplicity-backup/4.1.0.html">4.1.0</option>
+          
+        
+          
+            <option value="../../cookbooks/duplicity-backup/4.0.0.html">4.0.0</option>
+          
+        
+          
+        
+          
+            <option value="../../cookbooks/duplicity-backup/2.0.0.html">2.0.0</option>
+          
+        
+          
+            <option value="../../cookbooks/duplicity-backup/1.1.3.html">1.1.3</option>
+          
+        
+          
+            <option value="../../cookbooks/duplicity-backup/1.1.1.html">1.1.1</option>
+          
+        
+          
+            <option value="../../cookbooks/duplicity-backup/1.1.0.html">1.1.0</option>
+          
+        
+          
+            <option value="../../cookbooks/duplicity-backup/1.0.1.html">1.0.1</option>
+          
+        
+          
+            <option value="../../cookbooks/duplicity-backup/0.1.0.html">0.1.0</option>
+          
+        
+      </select>
+    </span>
+  </h1>
+
+  <p>Installs and configures duplicity for remote backup</p>
+  <code class="install-instructions">cookbook 'duplicity-backup', '~> 3.0.0'</code>
+
+  <div class="tab-container">
+    <ul class="detail-content__tabs">
+      <li><a href="#readme-tab">Readme</a></li>
+      <li><a href="#dependencies-tab">Dependencies</a></li>
+      <li><a href="#changelog-tab">Changelog</a></li>
+    </ul>
+
+    <div id="readme-tab" class="markdown">
+      <h1>inGenerator Backup cookbook</h1>
+
+<p><a href="https://travis-ci.org/ingenerator/chef-duplicity-backup"><img src="https://travis-ci.org/ingenerator/chef-duplicity-backup.png?branch=master" alt="Build Status"></a></p>
+
+<p><code>duplicity-backup</code> installs and configures <a href="http://duplicity.nongnu.org/">duplicity</a> to handle remote backup of files
+and/or databases on a server. It also installs <a href="http://www.unixwiz.net/tools/lockrun.html">lockrun</a> and
+uses this to ensure that your duplicity runs never overlap (which can cause resource exhaustion and backup corruption).</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>Chef 11 or higher</li>
+<li><strong>Ruby 1.9.3 or higher</strong></li>
+</ul>
+
+<h2>Installation</h2>
+
+<p>We recommend adding to your <code>Berksfile</code> and using <a href="http://berkshelf.com/">Berkshelf</a>:</p>
+
+<pre><code class="ruby">cookbook &#39;duplicity-backup&#39;, git: &#39;git://github.com/ingenerator/chef-duplicity-backup&#39;, branch: &#39;master&#39;
+</code></pre>
+
+<p>Have your main project cookbook <em>depend</em> on duplicity-backup by editing the <code>metadata.rb</code> for your cookbook.</p>
+
+<pre><code class="ruby"># metadata.rb
+depends &#39;duplicity-backup&#39;
+</code></pre>
+
+<p>If you want to backup a mysql database, you will also need to install the <code>mysql2</code> gem -
+to allow the cookbook to manage users - this is not handled by the cookbook.</p>
+
+<p>You can do this by depending on the <code>mysql2_chef_gem</code> cookbook and adding the following
+resource definition to a recipe of your own:</p>
+
+<pre><code class="ruby"># Your own recipe, called before referencing duplicity-backup
+mysql2_chef_gem &#39;default&#39; do
+  action :install
+end
+</code></pre>
+
+<h2>Usage</h2>
+
+<p>For simple cases, set the required attributes (see below) and add the default recipe to your <code>run_list</code>:
+```ruby</p>
+
+<h1>In a role</h1>
+
+<p>&quot;run_list&quot; : [
+  &quot;recipe[duplicity-backup::default]&quot;
+]</p>
+
+<h1>In a recipe - note your cookbook must declare a dependency in metadata.rb as above</h1>
+
+<p>include_recipe &quot;duplicity-backup::default&quot;
+```</p>
+
+<p>The default recipe executes the following steps:</p>
+
+<table><thead>
+<tr>
+<th>Recipe</th>
+<th>Action</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>install_duplicity</td>
+<td>Installs duplicity itself</td>
+</tr>
+<tr>
+<td>configure_backup</td>
+<td>Deploys the backup script and file list</td>
+</tr>
+<tr>
+<td>backup_mysql_user</td>
+<td>Creates a read-only database user for running backups, if database backup is configured</td>
+</tr>
+<tr>
+<td>backup_postgresql_user</td>
+<td>Creates a PostgreSQL database user for running backups, if database backup is configured</td>
+</tr>
+<tr>
+<td>schedule_backup</td>
+<td>Creates the cron task(s) for your backup</td>
+</tr>
+</tbody></table>
+
+<p><strong>Note that including the backup_mysql_user recipe causes chef to include the mysql client recipe, which will run before
+  all other recipes in your cookbook.</strong></p>
+
+<p>Output and any errors will be logged to syslog.</p>
+
+<p>To customise behaviour, include any or all of these recipes directly rather than relying on the default.</p>
+
+<h2>Attributes</h2>
+
+<p>There are several attributes that you <em>must</em> set before this recipe will work. We recommend using an encrypted data bag to
+store these, for obvious reasons.</p>
+
+<p>If any of these attributes are not set, the cookbook will raise an ArgumentError.</p>
+
+<table><thead>
+<tr>
+<th>Attribute</th>
+<th>Set to</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;backup_passphrase&#39;]</code></td>
+<td>The GnuPG passphrase to use for your backup</td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;duplicity_environment&#39;]</code></td>
+<td>A hash of environment variables to set for the duplicity backup run (eg for authentication)</td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;file_destination&#39;]</code></td>
+<td>The remote path where your files should be backed up</td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;db_destination&#39;]</code></td>
+<td>The remote path where your database dumps should be backed up</td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;pg_destination&#39;]</code></td>
+<td>The remote path where your PostgreSQL database dumps should be backed up</td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;backup_mysql&#39;]</code></td>
+<td>True to enable backup of a mysql database</td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;mysql&#39;][&#39;password&#39;]</code></td>
+<td>Password for the mysql user account that will run backups - the username defaults to &#39;backup&#39;</td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;backup_postgresql&#39;]</code></td>
+<td>True to enable backup of a PostgreSQL database</td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;postgresql&#39;][&#39;user&#39;]</code></td>
+<td>User for the postgresql user account that will run backups</td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;postgresql&#39;][&#39;password&#39;]</code></td>
+<td>Password for the postgresql user account that will run backups</td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;full_if_older_than&#39;]</code></td>
+<td>How often to run a full backup - backups in between will be incremental. See <a href="http://duplicity.nongnu.org/duplicity.1.html#sect9">http://duplicity.nongnu.org/duplicity.1.html#sect9</a></td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;keep_n_full&#39;]</code></td>
+<td>The number of full backups to keep - older backups will be purged</td>
+</tr>
+<tr>
+<td><code>node[&#39;duplicity&#39;][&#39;schedule&#39;]</code></td>
+<td>A cron schedule for your backup task - a hash of {day, hour, minute, month, weekday}</td>
+</tr>
+</tbody></table>
+
+<p>Other attributes are available to provide more control - see the attributes files in the cookbook for more details.</p>
+
+<h2>Configuring for backup to S3</h2>
+
+<p>Our usual strategy is to backup to an S3 bucket for the project, with separate paths in the bucket for the database and file backups. If there
+are multiple servers with file backups then we&#39;ll use a different destination path for each role - but usually we&#39;re only interested in uploaded
+user content, custom instance configuration and databases as everything else on the instance is provisioned from source control.</p>
+
+<p>To get this working:</p>
+
+<h3>Create an S3 bucket for the backups</h3>
+
+<p>Create a bucket on EC2 and store the destination in your role attributes. For a bucket <code>my-app-backup</code> you&#39;ll want to set:</p>
+
+<pre><code class="ruby">node.default[&#39;duplicity&#39;][&#39;file_destination&#39;] = &#39;s3+http://my-app-backup/files&#39;
+node.default[&#39;duplicity&#39;][&#39;db_destination&#39;] = &#39;s3+http://my-app-backup/database&#39;
+node.default[&#39;duplicity&#39;][&#39;pg_destination&#39;] = &#39;s3+http://my-app-backup/pg_database&#39;
+</code></pre>
+
+<p><strong>We default to setting the --s3-european-buckets flag for duplicity. This should work with buckets outside the EU as well, but
+  if you have issues you can set <code>node[&#39;duplicity&#39;][&#39;s3-european-buckets&#39;]</code> to false.</strong></p>
+
+<h3>Create an IAM user for the application backups</h3>
+
+<p>You should create a separate AWS IAM user for the application backups, with only the required S3 permissions. This user&#39;s keys will be stored
+in plain text on disk, so should be as restricted as possible.</p>
+
+<p>Set a policy like:</p>
+
+<pre><code>{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [
+    {
+      &quot;Action&quot;: [
+        &quot;s3:*&quot;
+      ],
+      &quot;Sid&quot;: &quot;Stmt1374798157000&quot;,
+      &quot;Resource&quot;: [
+        &quot;arn:aws:s3:::my-app-backup&quot;
+      ],
+      &quot;Effect&quot;: &quot;Allow&quot;
+    },
+    {
+      &quot;Action&quot;: [
+        &quot;s3:*&quot;
+      ],
+      &quot;Sid&quot;: &quot;Stmt1374798157001&quot;,
+      &quot;Resource&quot;: [
+        &quot;arn:aws:s3:::my-app-backup/*&quot;
+      ],
+      &quot;Effect&quot;: &quot;Allow&quot;
+    }
+  ]
+}
+</code></pre>
+
+<p>Grab the user&#39;s access key and secret access key and add them to your role attributes like this:</p>
+
+<pre><code class="ruby"># Note: you almost certainly want to store these in an encrypted data bag, not in plain text in your repo...
+node.default[&#39;duplicity&#39;][&#39;duplicity_environment&#39;][&#39;AWS_ACCESS_KEY_ID&#39;] = &#39;foo&#39;
+node.default[&#39;duplicity&#39;][&#39;duplicity_environment&#39;][&#39;AWS_SECRET_ACCESS_KEY&#39;] = &#39;bar&#39;
+</code></pre>
+
+<h3>Set the general configuration for file backups</h3>
+
+<pre><code class="ruby"># -- Configure the list of files to include
+# Note we use a hash to make merging more predictable, and to allow you to disable a path in a higher cookbook
+# Set the value false and the pattern will be skipped.
+node.default[&#39;duplicity&#39;][&#39;globbing_file_patterns&#39;][&#39;/var/www/uploads&#39;] = true
+
+# You can also exclude particular file patterns
+node.default[&#39;duplicity&#39;][&#39;globbing_file_patterns&#39;][&#39;- /var/www/uploads/.thumbs&#39;] = true
+
+# Set a passphrase to protect your backup - again, from an encrypted data bag ideally
+node.default[&#39;duplicity&#39;][&#39;backup_passphrase&#39;] = &#39;abcdefg&#39;
+
+# Configure how often to take a full backup (incremental backups will be performed between these runs)
+# This takes a full backup every 5 days
+node.default[&#39;duplicity&#39;][&#39;full_if_older_than&#39;] = &#39;5D&#39;
+
+# Configure how many successful full backups to keep (older ones will be purged)
+node.default[&#39;duplicity&#39;][&#39;keep_n_full&#39;] = 5
+
+# And configure the backup cron schedule - any missing schedule columns will be set to &#39;*&#39;
+# This entry (with no other attributes) will run daily at 3am
+node.default[&#39;duplicity&#39;][&#39;schedule&#39;][&#39;hour&#39;] = 3
+</code></pre>
+
+<h3>Set the general configuration for database backups</h3>
+
+<pre><code class="ruby"># Activate backups
+node.default[&#39;duplicity&#39;][&#39;backup_mysql&#39;] = true
+
+# Choose a password for the database backup user that will be created by this cookbook
+node.default[&#39;duplicity&#39;][&#39;mysql&#39;][&#39;password&#39;] = &#39;from-an-encrypted-data-bag&#39;
+
+# Optionally, if you have tables not using innodb, disable the single-transaction flag to mysqldump
+# This is the only reliable way to dump eg MyISAM, but requires a global lock which will impact production performance
+# If you&#39;re doing this, consider running a replicated slave to backup from instead
+node.default[&#39;duplicity&#39;][&#39;mysql&#39;][&#39;innodb_only&#39;] = false
+
+# Activate backup for PostgreSQL
+node.default[&#39;duplicity&#39;][&#39;backup_postgresql&#39;] = true
+
+# Choose a user and password for the PostgreSQL backup user that will be created by this cookbook
+# WARNING: will be created SUPERUSER user to do pg_dumpall
+node.default[&#39;duplicity&#39;][&#39;postgresql&#39;][&#39;user&#39;] = &#39;backup_user&#39;
+node.default[&#39;duplicity&#39;][&#39;postgresql&#39;][&#39;password&#39;] = &#39;from-an-encrypted-data-bag&#39;
+</code></pre>
+
+<h3>Testing</h3>
+
+<p>See the <a href=".travis.yml">.travis.yml</a> file for the current test scripts.</p>
+
+<h2>Contributing</h2>
+
+<ol>
+<li>Fork the project</li>
+<li>Create a feature branch corresponding to your change</li>
+<li>Create specs for your change</li>
+<li>Create your changes</li>
+<li>Create a Pull Request on github</li>
+</ol>
+
+<h2>License &amp; Authors</h2>
+
+<ul>
+<li>Author:: Andrew Coulton (<a href="mailto:andrew@ingenerator.com">andrew@ingenerator.com</a>)</li>
+</ul>
+
+<pre><code class="text">Copyright 2013-2014, inGenerator Ltd
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+
+    </div>
+
+    <div id="dependencies-tab">
+      
+        <ul class="dependency-list">
+          
+            
+            
+              <li>poise-python ~> 1.5.1</li>
+            
+          
+            
+            
+              <li>database > 5.1.0</li>
+            
+          
+            
+            
+              <li><a href="../../cookbooks/monitored-cron/0.2.0.html">monitored-cron ~> 0.1</a></li>
+            
+          
+            
+            
+              <li>postgresql >= 0.0.0</li>
+            
+          
+        </ul>
+      
+    </div>
+
+    <div id="changelog-tab" class="markdown">
+      <h1>Change Log</h1>
+
+<p>All notable changes to this project will be documented in this file.
+This project adheres to <a href="http://semver.org/">Semantic Versioning</a>.</p>
+
+<h2>Unreleased</h2>
+
+<h1>3.0.0 / 2017-02-17</h1>
+
+<ul>
+<li>[BREAKING] Switch from deprecated <code>python</code> cookbook to <code>poise-python</code> for
+installing duplicity&#39;s python dependencies.</li>
+<li>Support database cookbook 6.x series - the breaking change at 6.0 doesn&#39;t
+affect this cookbook.</li>
+<li>[BREAKING] Disables use of a trailing / on globbing file patterns : this
+syntax causes duplicity to back up empty tree structures with no files. Since
+this is potentially very dangerous, I&#39;ve disabled it.</li>
+<li>[BREAKING] Replaces the standard <code>cron</code> resource with <code>monitored_cron</code>, and:
+
+<ul>
+<li><strong>deletes</strong> any old <code>duplicity_backup</code> cron entry</li>
+<li><strong>deletes</strong> the previous <code>duplicity-backup::install_lockrun</code> recipe and
+related attributes</li>
+<li><strong>removes</strong> the duplicity <code>cron_command</code> attribute</li>
+<li><strong>removes</strong> the duplicity <code>mailto</code> attribute</li>
+<li>installs a new <code>monitored-duplicity-backup</code> cron using the wrapper script</li>
+<li>adds new optional attributes to configure a notification URL</li>
+</ul></li>
+</ul>
+
+<h2>2.0.0 / 2016-09-07</h2>
+
+<ul>
+<li>[BREAKING] Update to latest version of the database cookbook - note you
+<em>must</em> now install the mysql2_chef_gem yourself before use - this is no
+longer handled by this cookbook to minimise hard dependencies. See the
+README.</li>
+</ul>
+
+<h2>1.1.3 / 2016-09-07</h2>
+
+<ul>
+<li>[DEV] Update chefspec/chef dependencies and specs to resolve deprecation
+warnings</li>
+</ul>
+
+<h2>1.1.2 / 2016-04-05</h2>
+
+<ul>
+<li>[BUG] mysql backup script is still failing due to issues with --events flag</li>
+</ul>
+
+<h2>1.1.1 / 2016-04-05</h2>
+
+<ul>
+<li>[BUG] mysqldump user requires the <code>EVENT</code> privilege to backup events</li>
+<li>[BUG] backup script should fail if mysqldump fails</li>
+</ul>
+
+<h2>1.1.0 / 2016-03-29</h2>
+
+<ul>
+<li>[DEV] Update to latest berkshelf, chefspec, foodcritic &amp; ruby versions,
+    includes various fixes to get specs running (and at acceptable
+    speed) again with the new version.</li>
+<li>[BUG] Add --events option to backup mysql.event and suppress warning</li>
+</ul>
+
+<h2>1.0.1 / 2016-02-19</h2>
+
+<ul>
+<li>[HOTFIX] Update version number in metadata, not properly set in 1.0.0</li>
+</ul>
+
+<h2>1.0.0 / 2010-02-19</h2>
+
+<ul>
+<li>[FEATURE] First stable release - all the features!</li>
+</ul>
+
+    </div>
+  </div>
+</main>
+
+
+<div class="detail-sidebar">
+  <h4>Added to MiniMart</h4>
+  <p>September 09, 2020</p>
+  <h4>Maintainer</h4>
+  <p>Andrew Coulton</p>
+  <dl class="platform-list">
+    <dt>Supported Platforms</dt>
+    
+      <dd><i class="icon-ubuntu" title="Ubuntu"></i></dd>
+    
+  </dl>
+  
+  <a href="https://github.com/ingenerator/chef-duplicity-backup" class="button detail-sidebar__halfbutton">Source</a>
+  
+  
+  <a href="https://github.com/ingenerator/chef-duplicity-backup/issues" class="button detail-sidebar__halfbutton">Issues</a>
+  
+  <a href="../../cookbook_files/duplicity-backup/3_0_0/duplicity-backup-3.0.0.tar.gz" class="button detail-sidebar__button">Download</a>
+</div>
+
+<script>
+$(function () {
+  $('.tab-container').tabslet();
+  $('.cookbook-version-selector').change(function () {
+    document.location.href = encodeURI($(this).val());
+  });
+  $('#cookbook-search-form').submit(function (ev) {
+    ev.preventDefault();
+    var searchValue, searchPath;
+    searchValue = $(this).find('input[name="query"]').val();
+    searchPath  = $(this).attr('action');
+    document.location.href = encodeURI(searchPath + searchValue);
+  });
+});
+</script>
+
+  </div>
+
+  <footer class="footer">
+    <a href="http://www.madglory.com" target="_blank">
+      Powered by
+      <span class="footer__logo">
+        <img src="../../assets/images/mad-glory-logo.png" alt="Mad Glory" />
+      </span>
+    </a>
+  </footer>
+</body>
+</html>

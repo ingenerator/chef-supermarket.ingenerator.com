@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniMart</title>
+
+  <!-- fonts -->
+  <link href='//fonts.googleapis.com/css?family=Maven+Pro:400,700' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700,600' rel='stylesheet' type='text/css'>
+  <!-- css -->
+  <link rel="stylesheet" href="../../assets/stylesheets/application.min.css" />
+  <!-- js -->
+  <script src="../../assets/javascripts/application.min.js"></script>
+</head>
+<body>
+  <a href="../../index.html">
+  <header class="header-slim">
+    <div class="header-slim__container">
+      <h1 class="header-slim__title">Welcome to MiniMart</h1>
+      <h2 class="header-slim__subtitle">Always open and always open sourced.</h2>
+    </div>
+  </header>
+  </a>
+
+  <div class="outer-wrapper">
+    <form action="../../index.html#search/" method="GET" id="cookbook-search-form">
+  <div class="search">
+    <div class="search__td">
+      <input name="query" type="search">
+    </div>
+    <div class="search__td search__td--btn">
+      <button type="submit">Search</button>
+    </div>
+  </div>
+</form>
+
+<main class="detail-content">
+  <h1 class="detail-content__title">
+    monitored-cron
+    <span>
+      (4) Versions
+      <select class="cookbook-version-selector">
+        <option disabled selected>
+          <small>0.2.0</small>
+        </option>
+        
+          
+        
+          
+            <option value="../../cookbooks/monitored-cron/0.1.2.html">0.1.2</option>
+          
+        
+          
+            <option value="../../cookbooks/monitored-cron/0.1.1.html">0.1.1</option>
+          
+        
+          
+            <option value="../../cookbooks/monitored-cron/0.1.0.html">0.1.0</option>
+          
+        
+      </select>
+    </span>
+  </h1>
+
+  <p>Wraps cron jobs to provide logging, remote monitoring and alerting</p>
+  <code class="install-instructions">cookbook 'monitored-cron', '~> 0.2.0'</code>
+
+  <div class="tab-container">
+    <ul class="detail-content__tabs">
+      <li><a href="#readme-tab">Readme</a></li>
+      <li><a href="#dependencies-tab">Dependencies</a></li>
+      <li><a href="#changelog-tab">Changelog</a></li>
+    </ul>
+
+    <div id="readme-tab" class="markdown">
+      <h1>monitored-cron cookbook</h1>
+
+<p><a href="https://travis-ci.org/ingenerator/chef-monitored-cron"><img src="https://travis-ci.org/ingenerator/chef-monitored-cron.png?branch=1.x" alt="Build Status"></a></p>
+
+<p>The <code>monitored-cron</code> cookbook supports logging, monitoring and alerting of cron
+jobs rather than the traditional model of sending all their output to email.</p>
+
+<p>Use <code>monitored-cron</code> when you want to:</p>
+
+<ul>
+<li>Log all the output of a cron job to syslog.</li>
+<li>Report an error if a cron writes to STDERR.</li>
+<li>Notify a webhook URL when a cron runs successfully (use with services like
+statuscake or  to verify that your crons are running).</li>
+<li>Prevent more than one instance of a particular cron running simultaneously (eg
+if a task runs longer than it&#39;s usual duration).</li>
+</ul>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>Chef 12.18 or higher</li>
+<li><strong>Ruby 2.3 or higher</strong></li>
+</ul>
+
+<h2>Installation</h2>
+
+<p>We recommend adding to your <code>Berksfile</code> and using <a href="http://berkshelf.com/">Berkshelf</a>:</p>
+
+<pre><code class="ruby">source &#39;https://chef-supermarket.ingenerator.com&#39;
+cookbook &#39;monitored-cron&#39;, &#39;~&gt;0.2&#39;
+</code></pre>
+
+<h2>Custom resources</h2>
+
+<h2>monitored_cron</h2>
+
+<pre><code># Minimum configuration showing defaults
+monitored_cron &#39;backup&#39; do
+  command &#39;/path/to/backup --src=/my/files --dest=&quot;s3://backup&quot;&#39;
+  schedule       :time =&gt; :daily
+  # user         &#39;root&#39;
+  # require_lock false
+end
+
+# Or schedule with a cron expression
+monitored_cron &#39;backup&#39; do
+  command &#39;/path/to/backup --src=/my/files --dest=&quot;s3://backup&quot;&#39;
+  schedule :hour =&gt; 12, :minute =&gt; 5
+end
+
+# Prevent overlapping execution of later crons if it slows down
+# (this will cause a failure if a previous instance is still running when the
+#  next cron interval is triggered)
+monitored_cron &#39;backup&#39; do
+  command      &#39;/path/to/backup --src=/my/files --dest=&quot;s3://backup&quot;&#39;
+  schedule     :minute =&gt; &#39;*&#39;
+  require_lock true
+end
+
+# Allow the cron to retry getting a lock 2 times over 30 seconds
+monitored_cron &#39;backup&#39; do
+  command      &#39;/path/to/backup --src=/my/files --dest=&quot;s3://backup&quot;&#39;
+  schedule     :minute =&gt; &#39;*&#39;
+  require_lock true
+  lock_retries 2
+  lock_sleep   15
+end
+
+# Ping an HTTP/s URL on successful completion
+# The URL will not be called if the task outputs to stderr or exits nonzero
+monitored_cron &#39;backup&#39; do
+  command      &#39;/path/to/backup --src=/my/files --dest=&quot;s3://backup&quot;&#39;
+  schedule     :minute =&gt; &#39;*&#39;
+  notify_url   &#39;http://my.monitoring/service&#39;
+end
+
+# Report how long the task took to run in seconds
+monitored_cron  &#39;backup&#39; do
+  command       &#39;/path/to/backup --src=/my/files --dest=&quot;s3://backup&quot;&#39;
+  schedule      :minute =&gt; &#39;*&#39;
+  notify_url    &#39;http://my.monitoring/service?time=:runtime:&#39;
+  # will become http://my.monitoring/service?time=0.231
+end
+</code></pre>
+
+<h2>Testing</h2>
+
+<p>See the <a href=".travis.yml">.travis.yml</a> file for the current test scripts.</p>
+
+<h2>Contributing</h2>
+
+<ol>
+<li>Fork the project</li>
+<li>Create a feature branch corresponding to your change</li>
+<li>Create specs for your change</li>
+<li>Create your changes</li>
+<li>Create a Pull Request on github</li>
+</ol>
+
+<h2>License &amp; Authors</h2>
+
+<ul>
+<li>Author:: Andrew Coulton (<a href="mailto:andrew@ingenerator.com">andrew@ingenerator.com</a>)</li>
+</ul>
+
+<pre><code class="text">Copyright 2017, inGenerator Ltd
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+
+    </div>
+
+    <div id="dependencies-tab">
+      
+        <p>This cookbook has no dependencies.</p>
+      
+    </div>
+
+    <div id="changelog-tab" class="markdown">
+      <h1>Change Log</h1>
+
+<p>All notable changes to this project will be documented in this file.
+This project adheres to <a href="http://semver.org/">Semantic Versioning</a>. Note that
+0.x versions may be breaking, per the semver standard.</p>
+
+<h2>Unreleased</h2>
+
+<h2>0.2.0 (2017-08-10)</h2>
+
+<ul>
+<li>Fix internal namespace collision warnings for access to resource properties</li>
+<li>Ignore build-time files from the vendored cookbook</li>
+<li>Update build dependencies and build against Chef 12 and Chef 13</li>
+</ul>
+
+<h2>0.1.2 (2017-05-04)</h2>
+
+<ul>
+<li>Ensure any % signs in command output are encoded to prevent syslog.log treating them as
+format specifiers and failing with an ArgumentError</li>
+</ul>
+
+<h2>0.1.1 (2017-05-04)</h2>
+
+<ul>
+<li>Add a :delete action to remove old crons</li>
+</ul>
+
+<h2>0.1.0</h2>
+
+<ul>
+<li>First version</li>
+</ul>
+
+    </div>
+  </div>
+</main>
+
+
+<div class="detail-sidebar">
+  <h4>Added to MiniMart</h4>
+  <p>September 09, 2020</p>
+  <h4>Maintainer</h4>
+  <p>Andrew Coulton</p>
+  <dl class="platform-list">
+    <dt>Supported Platforms</dt>
+    
+      <dd><i class="icon-ubuntu" title="Ubuntu"></i></dd>
+    
+  </dl>
+  
+  <a href="https://github.com/ingenerator/chef-monitored-cron" class="button detail-sidebar__halfbutton">Source</a>
+  
+  
+  <a href="https://github.com/ingenerator/chef-monitored-cron/issues" class="button detail-sidebar__halfbutton">Issues</a>
+  
+  <a href="../../cookbook_files/monitored-cron/0_2_0/monitored-cron-0.2.0.tar.gz" class="button detail-sidebar__button">Download</a>
+</div>
+
+<script>
+$(function () {
+  $('.tab-container').tabslet();
+  $('.cookbook-version-selector').change(function () {
+    document.location.href = encodeURI($(this).val());
+  });
+  $('#cookbook-search-form').submit(function (ev) {
+    ev.preventDefault();
+    var searchValue, searchPath;
+    searchValue = $(this).find('input[name="query"]').val();
+    searchPath  = $(this).attr('action');
+    document.location.href = encodeURI(searchPath + searchValue);
+  });
+});
+</script>
+
+  </div>
+
+  <footer class="footer">
+    <a href="http://www.madglory.com" target="_blank">
+      Powered by
+      <span class="footer__logo">
+        <img src="../../assets/images/mad-glory-logo.png" alt="Mad Glory" />
+      </span>
+    </a>
+  </footer>
+</body>
+</html>

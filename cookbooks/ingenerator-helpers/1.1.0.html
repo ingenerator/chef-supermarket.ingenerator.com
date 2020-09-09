@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniMart</title>
+
+  <!-- fonts -->
+  <link href='//fonts.googleapis.com/css?family=Maven+Pro:400,700' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700,600' rel='stylesheet' type='text/css'>
+  <!-- css -->
+  <link rel="stylesheet" href="../../assets/stylesheets/application.min.css" />
+  <!-- js -->
+  <script src="../../assets/javascripts/application.min.js"></script>
+</head>
+<body>
+  <a href="../../index.html">
+  <header class="header-slim">
+    <div class="header-slim__container">
+      <h1 class="header-slim__title">Welcome to MiniMart</h1>
+      <h2 class="header-slim__subtitle">Always open and always open sourced.</h2>
+    </div>
+  </header>
+  </a>
+
+  <div class="outer-wrapper">
+    <form action="../../index.html#search/" method="GET" id="cookbook-search-form">
+  <div class="search">
+    <div class="search__td">
+      <input name="query" type="search">
+    </div>
+    <div class="search__td search__td--btn">
+      <button type="submit">Search</button>
+    </div>
+  </div>
+</form>
+
+<main class="detail-content">
+  <h1 class="detail-content__title">
+    ingenerator-helpers
+    <span>
+      (1) Version
+      <select class="cookbook-version-selector">
+        <option disabled selected>
+          <small>1.1.0</small>
+        </option>
+        
+          
+        
+      </select>
+    </span>
+  </h1>
+
+  <p>Simple standalone helpers for inGenerator cookbooks</p>
+  <code class="install-instructions">cookbook 'ingenerator-helpers', '~> 1.1.0'</code>
+
+  <div class="tab-container">
+    <ul class="detail-content__tabs">
+      <li><a href="#readme-tab">Readme</a></li>
+      <li><a href="#dependencies-tab">Dependencies</a></li>
+      <li><a href="#changelog-tab">Changelog</a></li>
+    </ul>
+
+    <div id="readme-tab" class="markdown">
+      <h1>inGenerator Helpers cookbook</h1>
+
+<p><a href="https://travis-ci.org/ingenerator/chef-ingenerator-helpers"><img src="https://travis-ci.org/ingenerator/chef-ingenerator-helpers.png?branch=1.x" alt="Build Status"></a></p>
+
+<p>The <code>ingenerator-helpers</code> cookbook provides simple helpers and reusable code blocks for
+our various chef cookbooks.</p>
+
+<p>It does not (and will not) provide recipes, LWRPs, or anything else that actually provisions
+anything - and it will never depend on other cookbooks. It&#39;s literally just here to simplify
+reused stuff.</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>Chef 12.18 or higher</li>
+<li><strong>Ruby 2.3 or higher</strong></li>
+</ul>
+
+<h2>Attribute Helpers</h2>
+
+<p>These are available in all recipes:</p>
+
+<ul>
+<li>raise_if_legacy_attributes - given a list of dot-separated attribute paths, will throw if any are
+defined. Add to recipes when updating cookbooks and dropping support for old attributes.</li>
+<li>raise_unless_customised - given a dot-separated attribute path, will throw if the default value
+has not been overridden.</li>
+</ul>
+
+<h2>Node environment</h2>
+
+<p>There are various places where configuration of an instance or a particular service depends on the
+environment - broadly defined as a local development box (eg Vagrant), a remote build slave, or a
+production server.</p>
+
+<p>Although chef supports a fully-featured <code>environment</code> layer as well as <code>roles</code>, these are quite
+heavyweight and involve repeating attribute overrides across projects in a way that has proved
+tricky to maintain.</p>
+
+<p>By convention, we now use a single flag in the <code>node[ingenerator][node_environment]</code> attribute, which
+defaults to <code>:production</code> but should be overridden in the appropriate project-level role definition
+/ Vagrantfile.</p>
+
+<p>This flag can then be used at attribute / recipe level to control the default behaviour of a cookbook,
+so that the environment-specific variations are visible inline with the rest of the cookbook setup
+for easier tracing and debugging.</p>
+
+<p>Usually, you should not toggle behaviour directly on this flag, but use it to initialise well-named
+behaviour-specific attributes to a suitable value. This then allows further overriding of that logic
+at the project / role level.</p>
+
+<p>Methods:</p>
+
+<ul>
+<li>is_environment?</li>
+<li>not_environment?</li>
+<li>node_environment</li>
+</ul>
+
+<p>For example:</p>
+
+<pre><code class="ruby"># attributes/default.rb
+if is_environment?(:localdev)
+  default[&#39;service&#39;][&#39;do_thing&#39;] = false
+else
+  default[&#39;service&#39;][&#39;do_thing&#39;] = true
+end
+
+# recipes/thing.rb
+if node[&#39;service&#39;][&#39;do_thing&#39;]
+  thing_service do
+    action :install
+  end
+end
+</code></pre>
+
+<h2>Custom resources</h2>
+
+<h2>notification_trigger</h2>
+
+<p>Sometimes you just want to queue a delayed notification to cause some action to
+happen right at the end of the chef run every time. There&#39;s probably an official
+way to do that, but since I can&#39;t find one you can do this:</p>
+
+<pre><code>notification_trigger &quot;Make a thing happen&quot; do
+  notifies :restart, &#39;service[brain]&#39;, :delayed
+end
+</code></pre>
+
+<h2>Installation</h2>
+
+<p>Add to your <code>Berksfile</code> and using <a href="http://berkshelf.com/">Berkshelf</a>:</p>
+
+<pre><code class="ruby">source &#39;https://chef-supermarket.ingenerator.com&#39;
+cookbook &#39;ingenerator-helpers&#39;, &#39;~&gt;1.0&#39;
+</code></pre>
+
+<p>Other cookbooks should then <em>depend</em> on ingenerator-helpers<code>in their</code>metadata.rb`</p>
+
+<pre><code class="ruby"># metadata.rb
+depends &#39;ingenerator-helpers&#39;
+</code></pre>
+
+<h3>Testing</h3>
+
+<p>See the <a href=".travis.yml">.travis.yml</a> file for the current test scripts.</p>
+
+<h2>Contributing</h2>
+
+<ol>
+<li>Fork the project</li>
+<li>Create a feature branch corresponding to your change</li>
+<li>Create specs for your change</li>
+<li>Create your changes</li>
+<li>Create a Pull Request on github</li>
+</ol>
+
+<h2>License &amp; Authors</h2>
+
+<ul>
+<li>Author:: Andrew Coulton (<a href="mailto:andrew@ingenerator.com">andrew@ingenerator.com</a>)</li>
+</ul>
+
+<pre><code class="text">Copyright 2016, inGenerator Ltd
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+
+    </div>
+
+    <div id="dependencies-tab">
+      
+        <p>This cookbook has no dependencies.</p>
+      
+    </div>
+
+    <div id="changelog-tab" class="markdown">
+      <h1>Change Log</h1>
+
+<p>All notable changes to this project will be documented in this file.
+This project adheres to <a href="http://semver.org/">Semantic Versioning</a>. Note that
+0.x versions may be breaking, per the semver standard.</p>
+
+<h2>Unreleased</h2>
+
+<h2>1.1.0 (2017-08-15)</h2>
+
+<ul>
+<li>[INTERNAL] Use converge_by instead of updated_by_last_action to trigger
+notification_trigger</li>
+<li>Support Chef 13, drop support for ancient Chef 12, exclude build-time files from
+generated cookbook.</li>
+</ul>
+
+<h2>1.0.0 (not released officially)</h2>
+
+<ul>
+<li>[FEATURE] <code>notification_trigger</code> resource to trigger notifications</li>
+<li>[FEATURE] Helper for the ingenerator_project_name which must be defined in a role
+before use</li>
+<li>[FEATURE] Add simple attribute helpers for common cases where we want to reject
+non-customised or legacy attribute definitions</li>
+<li>[FEATURE] Helpers for our node_environment options</li>
+</ul>
+
+    </div>
+  </div>
+</main>
+
+
+<div class="detail-sidebar">
+  <h4>Added to MiniMart</h4>
+  <p>September 09, 2020</p>
+  <h4>Maintainer</h4>
+  <p>Andrew Coulton</p>
+  <dl class="platform-list">
+    <dt>Supported Platforms</dt>
+    
+      <dd><i class="icon-ubuntu" title="Ubuntu"></i></dd>
+    
+  </dl>
+  
+  <a href="https://github.com/ingenerator/chef-ingenerator-helpers" class="button detail-sidebar__halfbutton">Source</a>
+  
+  
+  <a href="https://github.com/ingenerator/chef-ingenerator-helpers/issues" class="button detail-sidebar__halfbutton">Issues</a>
+  
+  <a href="../../cookbook_files/ingenerator-helpers/1_1_0/ingenerator-helpers-1.1.0.tar.gz" class="button detail-sidebar__button">Download</a>
+</div>
+
+<script>
+$(function () {
+  $('.tab-container').tabslet();
+  $('.cookbook-version-selector').change(function () {
+    document.location.href = encodeURI($(this).val());
+  });
+  $('#cookbook-search-form').submit(function (ev) {
+    ev.preventDefault();
+    var searchValue, searchPath;
+    searchValue = $(this).find('input[name="query"]').val();
+    searchPath  = $(this).attr('action');
+    document.location.href = encodeURI(searchPath + searchValue);
+  });
+});
+</script>
+
+  </div>
+
+  <footer class="footer">
+    <a href="http://www.madglory.com" target="_blank">
+      Powered by
+      <span class="footer__logo">
+        <img src="../../assets/images/mad-glory-logo.png" alt="Mad Glory" />
+      </span>
+    </a>
+  </footer>
+</body>
+</html>
