@@ -41,11 +41,9 @@
       (7) Versions
       <select class="cookbook-version-selector">
         <option disabled selected>
-          <small>2.0.0</small>
+          <small>4.0.0</small>
         </option>
         
-          
-            <option value="../../cookbooks/ingenerator-php/4.0.0.html">4.0.0</option>
           
         
           
@@ -61,6 +59,8 @@
           
         
           
+            <option value="../../cookbooks/ingenerator-php/2.0.0.html">2.0.0</option>
+          
         
           
             <option value="../../cookbooks/ingenerator-php/1.0.0.html">1.0.0</option>
@@ -75,7 +75,7 @@
   </h1>
 
   <p>Installs PHP with standard config and helpers for inGenerator projects</p>
-  <code class="install-instructions">cookbook 'ingenerator-php', '~> 2.0.0'</code>
+  <code class="install-instructions">cookbook 'ingenerator-php', '~> 4.0.0'</code>
 
   <div class="tab-container">
     <ul class="detail-content__tabs">
@@ -87,15 +87,15 @@
     <div id="readme-tab" class="markdown">
       <h1>inGenerator Standard PHP cookbook</h1>
 
-<p><a href="https://travis-ci.org/ingenerator/chef-ingenerator-php"><img src="https://travis-ci.org/ingenerator/chef-ingenerator-php.png?branch=2.x" alt="Build Status"></a></p>
+<p><a href="https://travis-ci.org/ingenerator/chef-ingenerator-php"><img src="https://travis-ci.org/ingenerator/chef-ingenerator-php.png?branch=4.x" alt="Build Status"></a></p>
 
 <p><code>ingenerator-php</code> provides standard PHP configuration and related tooling for our applications using Chef.</p>
 
 <h2>Requirements</h2>
 
 <ul>
-<li>Chef 12.18 or higher</li>
-<li><strong>Ruby 2.3 or higher</strong></li>
+<li>Chef 13.12 or higher</li>
+<li><strong>Ruby 2.4 or higher</strong></li>
 </ul>
 
 <h2>Installation</h2>
@@ -162,6 +162,11 @@ requires a composer.lock to be present, and will fail if this is missing. By def
 autoloader and activate apcu caching, unless running in the :localdev environment. Customise this behaviour
 with node attributes for now (though will in due course be added as resource options).</p>
 
+<p>By default this will run <code>composer check-platform-reqs</code> before installing dependencies. You
+can opt out of this by setting the <code>check_platform_reqs</code> resource attribute to false - but 
+it would be better to fix whatever it is about your packages / php environment that is
+causing the composer check to fail.</p>
+
 <pre><code class="ruby">composer_dependencies path_to_project_root_dir do
   run_as &#39;any-user-except-root&#39;
 end
@@ -193,7 +198,7 @@ override these or add further directives in your own cookbooks or roles.</p>
 <li>Author:: Andrew Coulton (<a href="mailto:andrew@ingenerator.com">andrew@ingenerator.com</a>)</li>
 </ul>
 
-<pre><code class="text">Copyright 2012-2013, inGenerator Ltd
+<pre><code class="text">Copyright 2012-2019, inGenerator Ltd
 
 Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
 you may not use this file except in compliance with the License.
@@ -221,7 +226,7 @@ limitations under the License.
           
             
             
-              <li>php ~> 4.5</li>
+              <li>php ~> 6.1</li>
             
           
         </ul>
@@ -236,6 +241,51 @@ This project adheres to <a href="http://semver.org/">Semantic Versioning</a>. No
 0.x versions may be breaking, per the semver standard.</p>
 
 <h2>Unreleased</h2>
+
+<h2>4.0.0 (2020-11-17)</h2>
+
+<ul>
+<li>(Hackily) switch to PHP7.4 on Ubuntu 18.04
+This is almost certainly the last release of this cookbook, and is just tiding us over
+the last few projects migrating to docker / k8s. As well as the cookbook changes here 
+you will need to update application provisioning, in particular to get apache to install
+<code>libapache2-mod-php7.4</code> from the ondrej PPA instead of the default <code>mod_php</code>.</li>
+</ul>
+
+<h2>3.0.0 (2019-02-17)</h2>
+
+<ul>
+<li>Drop ini directives for <code>allow_call_time_pass_reference</code> and <code>session.bug_compat_warn</code>
+(both removed) and <code>serialize_precision</code> (default of -1 uses improved algorithm in 
+php7)</li>
+<li>Install php7.2-mbstring by default (no longer included in standard php modules 
+with 7.2/apache on ubuntu)</li>
+<li>Update xdebug target version to 2.6.1 and use phpenmod to install (not php5enmod)</li>
+<li>[BREAKING] Update default module packages to their php7 versions and throw if a 
+project requests any php5 module packages</li>
+<li>[BREAKING] Update share_env_inis paths to /etc/php/7.2/... per ubuntu package
+locations - will throw if the project still specifies any at /etc/php5</li>
+<li>[BREAKING] Expect to install php7.2</li>
+<li>[BREAKING] drop chef12 support</li>
+<li>[BREAKING] update to the latest php cookbook (drops mysql dep, some pear related
+recipes) and apparently adds initial 18.04 support </li>
+</ul>
+
+<h2>2.1.0 (2018-08-24)</h2>
+
+<ul>
+<li>Bump build-time dependencies</li>
+<li>Run composer check-platform-reqs before installing dependencies by default - you 
+can disable this by setting the resource option if absolutely necessary but it 
+would be better to fix either the packages you&#39;re installing or the runtime 
+environment.</li>
+</ul>
+
+<h2>2.0.1 (2017-08-10)</h2>
+
+<ul>
+<li>Exclude unnecessary build-time files and dependencies from the vendored cookbook</li>
+</ul>
 
 <h2>2.0.0 (2017-08-09)</h2>
 
@@ -306,7 +356,7 @@ provisioning of xdebug remote debugging options</li>
   
   <a href="https://github.com/ingenerator/chef-ingenerator-php/issues" class="button detail-sidebar__halfbutton">Issues</a>
   
-  <a href="../../cookbook_files/ingenerator-php/2_0_0/ingenerator-php-2.0.0.tar.gz" class="button detail-sidebar__button">Download</a>
+  <a href="../../cookbook_files/ingenerator-php/4_0_0/ingenerator-php-4.0.0.tar.gz" class="button detail-sidebar__button">Download</a>
 </div>
 
 <script>
