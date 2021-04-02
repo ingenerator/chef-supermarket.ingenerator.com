@@ -41,11 +41,9 @@
       (12) Versions
       <select class="cookbook-version-selector">
         <option disabled selected>
-          <small>4.0.0</small>
+          <small>4.1.3</small>
         </option>
         
-          
-            <option value="../../cookbooks/duplicity-backup/4.1.3.html">4.1.3</option>
           
         
           
@@ -60,6 +58,8 @@
             <option value="../../cookbooks/duplicity-backup/4.1.0.html">4.1.0</option>
           
         
+          
+            <option value="../../cookbooks/duplicity-backup/4.0.0.html">4.0.0</option>
           
         
           
@@ -95,7 +95,7 @@
   </h1>
 
   <p>Installs and configures duplicity for remote backup</p>
-  <code class="install-instructions">cookbook 'duplicity-backup', '~> 4.0.0'</code>
+  <code class="install-instructions">cookbook 'duplicity-backup', '~> 4.1.3'</code>
 
   <div class="tab-container">
     <ul class="detail-content__tabs">
@@ -457,7 +457,7 @@ limitations under the License.
           
             
             
-              <li>postgresql >= 0.0.0</li>
+              <li>postgresql < 7.0.0</li>
             
           
         </ul>
@@ -470,7 +470,38 @@ limitations under the License.
 <p>All notable changes to this project will be documented in this file.
 This project adheres to <a href="http://semver.org/">Semantic Versioning</a>.</p>
 
-<h2>Unreleased</h2>
+<h1>4.1.3 (2021-04-02)</h1>
+
+<ul>
+<li>[BUG] Pin the pypi get_pip URL for python 2.7 (pypa is evidently now 
+returning a newer / incompatible version by default)</li>
+</ul>
+
+<h1>4.1.2 (2020-08-01)</h1>
+
+<ul>
+<li>[UPSTREAM BUG] Mysql &gt;= 5.7.31 introduces a new requirement for the backup user to have the <code>PROCESS</code> privilege :
+backups will fail without it. <a href="https://dev.mysql.com/doc/relnotes/mysql/5.7/en/news-5-7-31.html">https://dev.mysql.com/doc/relnotes/mysql/5.7/en/news-5-7-31.html</a> and 
+<a href="https://bugs.mysql.com/bug.php?id=100219">https://bugs.mysql.com/bug.php?id=100219</a>.</li>
+</ul>
+
+<h2>4.1.1 (2019-09-11)</h2>
+
+<ul>
+<li>[UPSTREAM BUG] Workaround for <a href="https://github.com/poise/poise-python/issues/146">https://github.com/poise/poise-python/issues/146</a> which causes pip install to fail on
+the current debian python version of 2.7.15+ - as the cookbook is abandoned it&#39;s unlikely this will be fixed upstream.</li>
+</ul>
+
+<h2>4.1.0 (2019-03-12)</h2>
+
+<ul>
+<li>[DEPS] Pin seven_zip to a version that works for Chef12 in our berksfile - this shouldn&#39;t
+affect external dependencies, but only apply to testing?</li>
+<li>[DEPS] Mark not compatible with postgresql cookbook 7.0 and above - they deleted
+all the recipes (described in the changelog as &#39;deprecated&#39; but actually outright gone)</li>
+<li>[BUG] Don&#39;t allow the mysql handler to attempt to backup the <code>sys</code> schema : 
+it causes problems with permissions</li>
+</ul>
 
 <h2>4.0.0 (2017-08-15)</h2>
 
@@ -598,7 +629,7 @@ warnings</li>
   
   <a href="https://github.com/ingenerator/chef-duplicity-backup/issues" class="button detail-sidebar__halfbutton">Issues</a>
   
-  <a href="../../cookbook_files/duplicity-backup/4_0_0/duplicity-backup-4.0.0.tar.gz" class="button detail-sidebar__button">Download</a>
+  <a href="../../cookbook_files/duplicity-backup/4_1_3/duplicity-backup-4.1.3.tar.gz" class="button detail-sidebar__button">Download</a>
 </div>
 
 <script>
