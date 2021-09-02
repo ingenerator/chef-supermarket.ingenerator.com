@@ -41,17 +41,17 @@
       (9) Versions
       <select class="cookbook-version-selector">
         <option disabled selected>
-          <small>0.5.1</small>
+          <small>0.6.1</small>
         </option>
         
-          
-            <option value="../../cookbooks/ingenerator-mysql/0.6.1.html">0.6.1</option>
           
         
           
             <option value="../../cookbooks/ingenerator-mysql/0.6.0.html">0.6.0</option>
           
         
+          
+            <option value="../../cookbooks/ingenerator-mysql/0.5.1.html">0.5.1</option>
           
         
           
@@ -83,7 +83,7 @@
   </h1>
 
   <p>Standard mySQL installation for our applications, including relevant PHP and application config</p>
-  <code class="install-instructions">cookbook 'ingenerator-mysql', '~> 0.5.1'</code>
+  <code class="install-instructions">cookbook 'ingenerator-mysql', '~> 0.6.1'</code>
 
   <div class="tab-container">
     <ul class="detail-content__tabs">
@@ -376,6 +376,16 @@ limitations under the License.
               <li><a href="../../cookbooks/ingenerator-helpers/1.1.0.html">ingenerator-helpers ~> 1.0</a></li>
             
           
+            
+            
+              <li>postgresql ~> 6.1</li>
+            
+          
+            
+            
+              <li>seven_zip ~> 3.0</li>
+            
+          
         </ul>
       
     </div>
@@ -388,6 +398,27 @@ This project adheres to <a href="http://semver.org/">Semantic Versioning</a>. No
 0.x versions may be breaking, per the semver standard.</p>
 
 <h2>Unreleased</h2>
+
+<h2>0.6.1 (2021-09-02)</h2>
+
+<ul>
+<li>[BUG] Pass credentials for logrotate with a config file rather than command line args, to silence
+an annoying daily log warning that the command line args are not secure.</li>
+</ul>
+
+<h2>0.6.0 (2019-11-28)</h2>
+
+<ul>
+<li>[BUG] compile mysql2 gem against mysqlclient 5.7.27 to resolve segfault when running alongside 5.7.28 or greater.
+There is an incompatibility between some system libraries - potentially openssl - and the ones shipped with chef. When
+the mysql2 gem is installed, by default it compiles the native extension and links it to system libraries for
+mysqlclient-dev but to chef&#39;s internal libraries for SSL and other packages. This then causes a segfault at runtime
+because the libs are not compatible. As a workaround, we ship the 5.7.27 version of libmysqlclient and ...-dev from
+the related ubuntu packages. We then provision these into /opt/chef/embedded and then (re)compile the mysql2 gem
+to link against these. This fixes the segfault while leaving the rest of the system happily on 5.7.28 (or later
+updates). <strong>NOTE: there is no guarantee this will work as expected on operating systems / platforms or Chef versions
+other Ubuntu 18.04 and Chef 13.x installed exactly the same way we use it.</strong></li>
+</ul>
 
 <h2>0.5.1 (2019-02-25)</h2>
 
@@ -512,7 +543,7 @@ not strings.</li>
   
   <a href="https://github.com/ingenerator/chef-ingenerator-mysql/issues" class="button detail-sidebar__halfbutton">Issues</a>
   
-  <a href="../../cookbook_files/ingenerator-mysql/0_5_1/ingenerator-mysql-0.5.1.tar.gz" class="button detail-sidebar__button">Download</a>
+  <a href="../../cookbook_files/ingenerator-mysql/0_6_1/ingenerator-mysql-0.6.1.tar.gz" class="button detail-sidebar__button">Download</a>
 </div>
 
 <script>
